@@ -55,6 +55,16 @@ To install for all users on Unix/Linux/OSX/Windows:
   python setup.py install
 
 
+How to use?
+=======
+
+See the examples directory. Inside you can find a script runtest.sh which
+show a simple use of the library to calculate the LSS parameters.
+
+If you check also at the bin directory you can find some usefull executables
+to run your calculations.
+
+
 Development
 ===========
 GIT
