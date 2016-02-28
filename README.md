@@ -7,6 +7,10 @@ in Liquid Chromatography.
 PyLSS is able to compute:
   - LSS parameters (log kw and S)
   - Build and plot chromatograms from experimental/predicted retention times
+  - A graphical user interface facilitate you to make models and easly
+    estimate LSS parameters
+
+![ScreenShot](https://github.com/gmrandazzo/PyLSS/blob/master/gui/pylssgui.png)
 
 PyLSS include a personalised algorithm to optimise and calculate the LSS parameters
 in a fast manner.
