@@ -60,7 +60,11 @@
             </widget>
            </item>
            <item row="1" column="0" colspan="2">
-            <widget class="QListView" name="listView"/>
+            <widget class="QListView" name="listView">
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -76,31 +80,44 @@
           <attribute name="label">
            <string>Gradient Parameters</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout">
-           <item>
-            <layout class="QGridLayout" name="gridLayout_6">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_5">
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="6" column="0">
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QLabel" name="label_14">
                <property name="text">
-                <string>Select LSS model..</string>
+                <string>Dwell volume</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QComboBox" name="modelBox"/>
+             <item>
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>0.001000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.050000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.370000000000000</double>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
-           <item>
-            <layout class="QGridLayout" name="gridLayout_5">
-             <item row="0" column="0">
+           <item row="1" column="0">
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
               <widget class="QLabel" name="label">
                <property name="text">
                 <string>Flow Rate</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
+             <item>
               <widget class="QDoubleSpinBox" name="doubleSpinBox_1">
                <property name="decimals">
                 <number>3</number>
@@ -118,7 +135,7 @@
              </item>
             </layout>
            </item>
-           <item>
+           <item row="2" column="0">
             <layout class="QGridLayout" name="gridLayout_4">
              <item row="0" column="0">
               <widget class="QLabel" name="label_2">
@@ -139,7 +156,7 @@
              </item>
             </layout>
            </item>
-           <item>
+           <item row="3" column="0">
             <layout class="QGridLayout" name="gridLayout_3">
              <item row="0" column="0">
               <widget class="QLabel" name="label_3">
@@ -157,7 +174,7 @@
              </item>
             </layout>
            </item>
-           <item>
+           <item row="4" column="0">
             <layout class="QGridLayout" name="gridLayout_9">
              <item row="0" column="0">
               <widget class="QLabel" name="label_6">
@@ -184,90 +201,8 @@
              </item>
             </layout>
            </item>
-           <item>
-            <layout class="QGridLayout" name="gridLayout_11">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_13">
-               <property name="text">
-                <string>Peak A</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QDoubleSpinBox" name="PeakA">
-               <property name="decimals">
-                <number>2</number>
-               </property>
-               <property name="minimum">
-                <double>0.100000000000000</double>
-               </property>
-               <property name="value">
-                <double>10.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_12">
-               <property name="text">
-                <string>Peak B</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="PeakB">
-               <property name="minimum">
-                <double>0.010000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.010000000000000</double>
-               </property>
-               <property name="value">
-                <double>0.010000000000000</double>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
+           <item row="5" column="0">
             <layout class="QGridLayout" name="gridLayout_2">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>Column lenght</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_8">
-               <property name="text">
-                <string>Column porosity</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QDoubleSpinBox" name="ColumnPorositySpinBox">
-               <property name="decimals">
-                <number>2</number>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QDoubleSpinBox" name="ColumnLenghtSpinBox">
-               <property name="decimals">
-                <number>2</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_7">
-               <property name="text">
-                <string>Column diameter</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="CulumnDiameterSpinBox"/>
-             </item>
              <item row="0" column="2">
               <widget class="QLabel" name="label_9">
                <property name="text">
@@ -285,9 +220,71 @@
              <item row="2" column="2">
               <widget class="QLabel" name="label_11">
                <property name="text">
-                <string>%</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;µm&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Column lenght</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Particle size</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="ColumnPorositySpinBox">
+               <property name="decimals">
+                <number>2</number>
+               </property>
+               <property name="value">
+                <double>1.700000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="ColumnLenghtSpinBox">
+               <property name="decimals">
+                <number>0</number>
+               </property>
+               <property name="value">
+                <double>15.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Column diameter</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="CulumnDiameterSpinBox">
+               <property name="value">
+                <double>2.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="0" column="0">
+            <layout class="QGridLayout" name="gridLayout_6">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Select LSS model..</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QComboBox" name="modelBox"/>
              </item>
             </layout>
            </item>
@@ -310,6 +307,11 @@
        <string>Chromatogram</string>
       </property>
       <zorder>settingBox</zorder>
+      <zorder>toolBox</zorder>
+      <zorder>toolBox</zorder>
+      <zorder>toolBox</zorder>
+      <zorder>toolBox</zorder>
+      <zorder>toolBox</zorder>
      </widget>
     </item>
     <item row="2" column="1">
@@ -445,9 +447,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_Session"/>
-    <addaction name="actionSave_Session"/>
-    <addaction name="actionExport_LSS_Parameter"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuCalculation">
@@ -457,7 +456,6 @@
     <addaction name="actionCalcLSSParameter"/>
     <addaction name="separator"/>
     <addaction name="actionGetBestGradientConditions"/>
-    <addaction name="actionGetBestIsocraticConditions"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">

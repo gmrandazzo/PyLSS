@@ -20,6 +20,8 @@ from pylss.plotengine import BuildChromatogram
 import mainwindow as mw
 from importdialog import *
 from computelss import *
+from computebestgradient import *
+from aboutdialog import *
 from utilities import *
 
 class Data(object):
@@ -49,8 +51,16 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.modellst = []
         self.lstdatamodel = QtGui.QStandardItemModel(self.listView)
         self.listView.setModel(self.lstdatamodel)
+        self.current_lst_index = -1
         self.addButton.clicked.connect(self.add)
+        self.removeButton.clicked.connect(self.remove)
         self.actionCalcLSSParameter.triggered.connect(self.calculatelss)
+        self.actionGetBestGradientConditions.triggered.connect(self.calculatebestgrad)
+        self.actionAbout.triggered.connect(self.about)
+        self.actionQuit.triggered.connect(self.quit)
+        self.listView.clicked.connect(self.viewmatrix)
+        self.toolBox.currentChanged.connect(self.viewmatrix)
+
         self.zoomButton.clicked.connect(self.zoom)
         self.panButton.clicked.connect(self.pan)
         self.rescaleButton.clicked.connect(self.home)
@@ -59,11 +69,10 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.doubleSpinBox_2.valueChanged.connect(self.gradientanalyser)
         self.doubleSpinBox_3.valueChanged.connect(self.gradientanalyser)
         self.doubleSpinBox_4.valueChanged.connect(self.gradientanalyser)
+        self.doubleSpinBox_5.valueChanged.connect(self.gradientanalyser)
         self.ColumnLenghtSpinBox.valueChanged.connect(self.gradientanalyser)
         self.CulumnDiameterSpinBox.valueChanged.connect(self.gradientanalyser)
         self.ColumnPorositySpinBox.valueChanged.connect(self.gradientanalyser)
-        self.PeakA.valueChanged.connect(self.gradientanalyser)
-        self.PeakB.valueChanged.connect(self.gradientanalyser)
 
         # Add plot
         self.figure = plt.figure()
@@ -78,6 +87,37 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
         self.tablemodel = TableModel(self)
         self.tableView.setModel(self.tablemodel)
+
+    def keyPressEvent(self, e):
+        if (e.modifiers() & QtCore.Qt.ControlModifier):
+            if e.key() == QtCore.Qt.Key_C: #copy
+                if len(self.tableView.selectionModel().selectedIndexes()) > 0:
+                    previous = self.tableView.selectionModel().selectedIndexes()[0]
+                    columns = []
+                    rows = []
+                    for index in self.tableView.selectionModel().selectedIndexes():
+                        if previous.column() != index.column():
+                            columns.append(rows)
+                            rows = []
+                        rows.append(str(index.data().toPyObject()))
+                        previous = index
+                    columns.append(rows)
+                    print columns
+
+                    # add rows and columns to clipboard
+                    clipboard = ""
+                    nrows = len(columns[0])
+                    ncols = len(columns)
+                    for r in xrange(nrows):
+                        for c in xrange(ncols):
+                            clipboard += columns[c][r]
+                            if c != (ncols-1):
+                                clipboard += '\t'
+                        clipboard += '\n'
+
+                    # copy to the system clipboard
+                    sys_clip = QtGui.QApplication.clipboard()
+                    sys_clip.setText(clipboard)
 
     def home(self):
         self.toolbar.home()
@@ -96,13 +136,56 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
     def add(self):
         idialog = ImportDialog()
-        idialog.exec_()
-        [name, molname, trdata, grad, tg, td, t0, flow] = idialog.getdata()
-        self.datalst.append(Data(name, molname, trdata, grad, tg, td, t0, flow))
-        self.lstdatamodel.appendRow(QtGui.QStandardItem(name))
+        if idialog.exec_() == 1:
+            [name, molname, trdata, grad, tg, td, t0, flow] = idialog.getdata()
+            self.datalst.append(Data(name, molname, trdata, grad, tg, td, t0, flow))
+            self.lstdatamodel.appendRow(QtGui.QStandardItem(name))
 
     def remove(self):
-        print "remove"
+        if self.current_lst_index >= 0 and self.current_lst_index < len(self.datalst):
+            del self.datalst[self.current_lst_index]
+            self.lstdatamodel.removeRow(self.current_lst_index)
+
+    def viewmatrix(self, indx):
+        if self.toolBox.currentIndex() == 0:
+            if indx:
+                self.current_lst_index =  indx.row()
+                del self.tablemodel.arraydata[:]
+                del self.tablemodel.header[:]
+                self.tablemodel.clean()
+                self.tableView.model().layoutChanged.emit()
+                molname = self.datalst[self.current_lst_index].molname
+                trdata = self.datalst[self.current_lst_index].trdata
+                grad = self.datalst[self.current_lst_index].grad
+                self.tablemodel.header.append("Molecules")
+                for i in range(len(grad)):
+                    self.tablemodel.header.append("tR %d" % (int(grad[i]*100)))
+                if len(molname) > 0:
+                    for i in range(len(trdata)):
+                        row = [molname[i]]
+                        for j in range(len(trdata[i])):
+                            row.append(trdata[i][j])
+                        self.tablemodel.addRow(row)
+                else:
+                    for i in range(len(trdata)):
+                        row = ["Molecule %d" % (i)]
+                        for j in range(len(trdata[i])):
+                            row.append(trdata[i][j])
+                        self.tablemodel.addRow(row)
+                self.tableView.model().layoutChanged.emit()
+        else:
+            del self.tablemodel.arraydata[:]
+            del self.tablemodel.header[:]
+            self.tablemodel.clean()
+            self.tableView.model().layoutChanged.emit()
+            self.gradientanalyser()
+
+    def about(self):
+        adialog = AboutDialog()
+        adialog.exec_()
+
+    def quit(self):
+        QtGui.QApplication.quit()
 
     def calculatelss(self):
         items = []
@@ -141,9 +224,16 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             if len(self.modellst) == 1:
                 self.gradientanalyser()
 
+    def calculatebestgrad(self):
+        getbestgrad = ComputeBestGradient(self.modellst)
+        getbestgrad.exec_()
+
     def gradientanalyser(self):
         indx = self.modelBox.currentIndex()
+        del self.tablemodel.arraydata[:]
+        del self.tablemodel.header[:]
         self.tablemodel.clean()
+        self.tablemodel.header.append("Molecule")
         self.tablemodel.header.append("Log kW")
         self.tablemodel.header.append("S")
         self.tablemodel.header.append("tR")
@@ -153,37 +243,45 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             lss = self.modellst[indx].lss
             flow_sofware = float(self.doubleSpinBox_1.value())
             init_B_soft = float(self.doubleSpinBox_2.value())/100.
-            finalB_soft = float(self.doubleSpinBox_3.value())/100.
+            final_B_soft = float(self.doubleSpinBox_3.value())/100.
             tg_soft = float(self.doubleSpinBox_4.value())
 
             c_lenght = self.ColumnLenghtSpinBox.value()
             c_diameter = self.CulumnDiameterSpinBox.value()
-            c_porosity = self.ColumnPorositySpinBox.value()
+            c_particle = self.ColumnPorositySpinBox.value()
 
             t0_soft = 0.
             td_soft = 0.
 
             v_m = None
-            v_d = self.modellst[indx].v_d
-            if c_lenght > 0 and c_diameter > 0 and c_porosity > 0:
-                v_m = ((square(self.c_diameter)*self.c_length*pi*self.c_porosity)/4.)/1000.
-            else:
-                v_m = self.modellst[indx].v_m
+            v_d = float(self.doubleSpinBox_5.value())
+
+            #if c_lenght > 0 and c_diameter > 0 and c_porosity > 0:
+            #    v_m = ((square(self.c_diameter)*self.c_length*pi*self.c_porosity)/4.)/1000.
+            #else:
+            v_m = self.modellst[indx].v_m
 
             t0_soft = float(v_m/flow_sofware)
             td_soft = float(v_d/flow_sofware)
 
-            A = self.PeakA.value()
-            B = self.PeakB.value()
+            A = 1.0
+
+            N = (c_lenght*10000.)/(2.3*c_particle)
+
             trtab = []
             lssmol = LinearGenerator(None, None, None, t0_soft, float(self.modellst[indx].v_d), flow_sofware)
+            i = 1
             for row in lss:
                 lss_logkw = float(row[0])
                 lss_s = float(row[1])
-                trtab.append([lssmol.rtpred(lss_logkw, lss_s, tg_soft, init_B_soft, finalB_soft, t0_soft, td_soft), A, B])
-                row = [lss_logkw, lss_s, trtab[-1][0]]
+                b = (t0_soft*(final_B_soft-init_B_soft)*lss_s)/tg_soft
+                # See D. Guillazne et al / J. Chromatogr. A 1216(2009) 3232-3243
+                W = (4*t0_soft)/sqrt(N)* (1+ 1/(2.3*b))/4
+                trtab.append([lssmol.rtpred(lss_logkw, lss_s, tg_soft, init_B_soft, final_B_soft, t0_soft, td_soft), A, W])
+                row = ["Molecule %d" % (i), lss_logkw, lss_s, trtab[-1][0]]
                 self.tablemodel.addRow(row)
                 self.tableView.model().layoutChanged.emit()
+                i += 1
 
             peaks = BuildChromatogram(trtab, tg_soft, 0.01)
             peaks = zip(*peaks)
@@ -199,6 +297,9 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             ax = self.figure.add_subplot(111)
             ax.hold(False)
             ax.plot(x, y, '-')
+            plt.xlabel('Time')
+            plt.ylabel('Signal')
+
             self.canvas.draw()
             #self.plotchromatogram()
 

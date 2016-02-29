@@ -85,7 +85,7 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
                     for item in v:
                         tg.append(float(item))
                 else:
-                    molname.append("Molecule %d" % (i+1))
+                    molname.append("Molecule %d" % (i))
                     trdata.append(list())
                     for item in v:
                         trdata[-1].append(float(item))
