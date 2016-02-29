@@ -1,3 +1,12 @@
+'''
+@package computelss.py
+
+computelss.py was writen by Giuseppe Marco Randazzo <gmrandazzo@gmail.com>
+and is distributed under LGPL version 3
+
+Geneve February 2015
+'''
+
 from PyQt4 import *
 from PyQt4 import *
 import sys

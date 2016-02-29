@@ -1,3 +1,13 @@
+'''
+@package main.py
+
+main.py was writen by Giuseppe Marco Randazzo <gmrandazzo@gmail.com>
+and is distributed under LGPL version 3
+
+Geneve February 2015
+'''
+
+import sys
 from PyQt4 import QtGui
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -7,13 +17,10 @@ import matplotlib.pyplot as plt
 from pylss.lssengine import *
 from pylss.plotengine import BuildChromatogram
 
-
-
-import sys
-
 import mainwindow as mw
 from importdialog import *
 from computelss import *
+from utilities import *
 
 class Data(object):
     def __init__(self, name, molname, trdata, grad, tg, vd, t0, flow):

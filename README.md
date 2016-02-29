@@ -50,6 +50,7 @@ The required dependencies to use PyLSS are:
 - python
 - numpy
 - matplotlib
+- PyQt4 to use the GUI
 
 Install
 =======
@@ -58,8 +59,12 @@ To install for all users on Unix/Linux/OSX/Windows:
 
   python setup.py install
 
+To use the GUI:
+  - install PyQt4 https://sourceforge.net/projects/pyqt/
+  - go into the directory gui and do "make"
+  - run python main.py to visualize the interface
 
-How to use?
+How to use the command line?
 =======
 
 See the examples directory. Inside you can find a script runtest.sh which
