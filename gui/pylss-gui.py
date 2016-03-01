@@ -10,10 +10,16 @@ Geneve February 2015
 import os
 import sys
 
-path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+path = None
+try:
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+except NameError:
+    path = os.path.dirname(os.path.abspath(sys.argv[0]))
 if not path in sys.path:
     sys.path.insert(1, path)
 del path
+
+
 
 from PyQt4 import QtGui
 
