@@ -7,12 +7,20 @@ and is distributed under LGPL version 3
 Geneve February 2015
 '''
 
+import os
 import sys
+
+path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if not path in sys.path:
+    sys.path.insert(1, path)
+del path
+
 from PyQt4 import QtGui
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
+
 
 from pylss.lssengine import *
 from pylss.plotengine import BuildChromatogram

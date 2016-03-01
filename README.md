@@ -81,7 +81,7 @@ GIT
 
 You can check the latest sources with the command::
 
-  git clone https://github.com/zeld/PyLSS.git
+  git clone https://github.com/gmrandazzo/PyLSS.git
 
 
 Contributing
