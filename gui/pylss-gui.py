@@ -14,17 +14,17 @@ path = None
 try:
     path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 except NameError:
-    path = os.path.dirname(os.path.abspath(sys.argv[0]))
+    path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 if not path in sys.path:
     sys.path.insert(1, path)
 del path
-
 
 
 from PyQt4 import QtGui
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+import matplotlib.backends.backend_tkagg
 import matplotlib.pyplot as plt
 
 
