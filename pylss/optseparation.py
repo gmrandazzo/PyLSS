@@ -216,7 +216,7 @@ class OptSep(object):
             kstar = []
             for row in self.logkw_s_tab:
                 b = (self.v_m * deltafi * row[1]) / (tg*flow)
-                kstar.append(float(1.0/(1.15*b)))
+                kstar.append(float(1.0/(2.3*b)))
                 logk0 = row[0] - (row[1] * init_b)
                 k0 = float(pow(10, logk0))
                 tr_tmp = ((t0/b) * log10(2.3*k0*b)) + t0 + td
@@ -264,8 +264,8 @@ class OptSep(object):
                 for tg in drange(1, self.maxtg, 1):
                     for flow in drange(0.1, self.maxflow, 0.05):
                         gcond = [init_b, final_b, tg, flow]
-                        from scipy.optimize import fmin
-                        tmp_bestgcond = fmin(self.gradient_iterfun, gcond, xtol=1e-3)
+                        tmp_bestgcond = fmin(self.gradient_iterfun, gcond, side=[0.1, 0.1, 0.1], tol=1e-10)
+                        #tmp_bestgcond = fmin(self.gradient_iterfun, gcond, xtol=1e-3)
                         rslst.append(1/self.gradient_iterfun(tmp_bestgcond))
                         gcondlst.append(tmp_bestgcond)
 
@@ -306,17 +306,18 @@ class OptSep(object):
 
         return bestgcond, tr, 1/self.gradient_iterfun(bestgcond)
 
-    def getplotgradientconditions(self):
+    def getplotgradientconditions(self, flow_min=0.2, flow_max=1, g_start_min=0.05, grad_start_max=0.95,
+                                  g_stop_min=0.1, g_stop_max=0.95, time_min=2, time_max=60):
         """ Plot the Rs function of the different parameters
 	    to optimize under gradient conditions
         """
         gcondlst = []
         rslst = []
         trlst = []
-        for init_b in drange(0.10, 0.90, 0.1):
-            for final_b in drange(init_b+0.1, 0.9, 0.1):
-                for tg in drange(5, self.maxtg,  1):
-                    for flow in drange(0.4, self.maxflow, 0.1):
+        for init_b in drange(g_start_min, grad_start_max, 0.1):
+            for final_b in drange(g_stop_min, g_stop_max, 0.1):
+                for tg in drange(time_min, time_max,  1):
+                    for flow in drange(flow_min, flow_max, 0.1):
                         # Function calculation
                         deltafi = final_b - init_b
                         t0 = self.v_m/flow
@@ -325,7 +326,7 @@ class OptSep(object):
                         kstar = []
                         for row in self.logkw_s_tab:
                             b = (self.v_m * deltafi * row[1]) / (tg*flow)
-                            kstar.append(float(1.0/(1.15*b)))
+                            kstar.append(float(1.0/(2.3*b)))
                             k0 = pow(10, row[0] - row[1] * init_b)
                             try:
                                 tr_tmp = ((t0/b) * log10(2.3*k0*b)) + t0 + td
