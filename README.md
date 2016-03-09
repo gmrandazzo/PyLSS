@@ -1,8 +1,7 @@
 # PyLSS
 
-PyLSS is a python package useful to calculate linear solvent strength parameters
+PyLSS [1] is a python package useful to calculate linear solvent strength parameters [2]
 in Liquid Chromatography.
-
 
 PyLSS is able to compute:
   - LSS parameters (log kw and S)
@@ -17,7 +16,12 @@ in a fast manner.
 
 References:
 ----------
-[1] High-Performance Gradient Elution:
+[1] Prediction of retention time in reversed-phase liquid chromatography as a tool for steroid identification
+G.M. Randazzo, D. Tonoli, S. Hambye, D. Guillarme, F. Jeanneret, A. Nurisso, L. Goracci, J. Boccard, Prof. S. Rudaz
+Analytica Chimica Acta 2016
+doi:10.1016/j.aca.2016.02.014
+
+[2] High-Performance Gradient Elution:
 The Practical Application of the Linear-Solvent-Strength Model
 Lloyd R. Snyder, John W. Dolan
 ISBN: 978-0-471-70646-5
