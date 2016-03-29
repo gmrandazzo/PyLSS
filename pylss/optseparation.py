@@ -10,7 +10,7 @@ automatically trough the L-BFGS-B method.
 
 '''
 
-from pylss.optimizer import simplex as fmin
+from optimizer import simplex as fmin
 from math import sqrt, log10, fabs, isnan, isinf
 
 def drange(start, stop, step):

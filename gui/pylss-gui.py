@@ -9,12 +9,15 @@ Geneve February 2015
 
 import os
 import sys
+import Tkinter
+import FileDialog
 
 path = None
 try:
     path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 except NameError:
     path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+path += "/pylss"
 if not path in sys.path:
     sys.path.insert(1, path)
 del path
@@ -28,8 +31,8 @@ import matplotlib.backends.backend_tkagg
 import matplotlib.pyplot as plt
 
 
-from pylss.lssengine import *
-from pylss.plotengine import BuildChromatogram
+from lssengine import *
+from plotengine import BuildChromatogram
 
 import mainwindow as mw
 from importdialog import *
