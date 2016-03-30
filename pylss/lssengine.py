@@ -156,13 +156,13 @@ class LinearGenerator(object):
                 """
                 less powerfull in some cases due to the log10 approximation...
                 """
-                logk0 = logkw - S*(init_B/100.)
+                logk0 = logkw - S*(init_B)
                 k0 = pow(10, logk0)
                 tr_pred = ((t0/b) * log10(2.3*k0*b))+ t0 + td
 
                 """
                 better powerfull
-                lnk0 = logkw - S*(self.init_B/100.)
+                lnk0 = logkw - S*(self.init_B)
                 k0 = exp(lnk0)
                     tr1_pred = log(b1*k0*self.t0+1)/b1 + self.t0 + self.td
                 tr2_pred = log(b2*k0*self.t0+1)/b2 + self.t0 + self.td

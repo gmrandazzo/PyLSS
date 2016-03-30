@@ -9,6 +9,7 @@ Geneve February 2015
 
 import os
 import sys
+# pyinstaller bug under windows
 import Tkinter
 import FileDialog
 

@@ -12,7 +12,7 @@ from PyQt4 import *
 
 def nsplit(s, delim=None):
     """ Split a string by a delimiter """
-    return [x for x in s.split(delim) if x]
+    return [x.strip() for x in s.split(delim) if x]
 
 class TableModel(QtCore.QAbstractTableModel):
     """ Class to visualize array in a QTableView """
