@@ -44,53 +44,85 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
         f = open(self.lineEdit.text())
         self.tablemodel.clean()
         i = 0
+        grad = []
+        tg = []
         for line in f:
-            if i < 10:
-                v = nsplit(line.strip(), self.splitlineby.currentText())
-                self.tablemodel.addRow(v)
-                self.tableView.model().layoutChanged.emit()
+            if "dwell volume" in line.lower():
+                self.dwelVolSpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
+            elif "flow rate" in line.lower():
+                self.flowrateSpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
+            elif "time zero" in line.lower():
+                self.t0SpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
+            elif "gradient " in line.lower(): # Each line is a gradient column
+                v = str.split(line.strip(), ":")[-1].strip()
+                v = str.split(v, " ")
+                tg.append(float(v[0]))
+                grad.append([float(v[1])/100., float(v[2])/100.])
             else:
-                break
+                v = nsplit(line.strip(), self.splitlineby.currentText())
+                row = []
+                if i < 10:
+                    if i == 0:
+                        header = []
+                        header.append("Molecule")
+                        for j in range(len(v)):
+                            header.append("%.1f%%-%.1f%%-%d min" % (round(grad[j][0]*100,1), round(grad[j][1]*100,1), tg[j]))
+                        self.tablemodel.setHeader(header)
+                        self.tableView.model().layoutChanged.emit()
+
+                    if self.firstcolobjname.isChecked():
+                        row.append(v[0])
+                        for item in v[1:-1]:
+                            row.append(float(item))
+                    else:
+                        row.append("Molecule %d" % (i+1))
+                        for item in v:
+                            row.append(float(item))
+                    self.tablemodel.addRow(row)
+                    self.tableView.model().layoutChanged.emit()
+                    i += 1
+                else:
+                    row.append("...")
+                    for j in range(len(v)):
+                        row.append("...")
+                    self.tablemodel.addRow(row)
+                    self.tableView.model().layoutChanged.emit()
+                    break
         f.close()
 
     def getdata(self):
         trdata = []
         molname = []
-        grad = [self.GStartSpinBox.value()/100., self.GStopSpinBox.value()/100.]
+        grad = []
         tg = []
-        if self.firstcolobjname.isChecked():
-            f = open(self.lineEdit.text())
-            self.tablemodel.clean()
-            i = 0
-            for line in f:
+        f = open(self.lineEdit.text())
+        self.tablemodel.clean()
+        i = 0
+        for line in f:
+            if "dwell volume" in line.lower():
+                self.dwelVolSpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
+            elif "flow rate" in line.lower():
+                self.flowrateSpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
+            elif "time zero" in line.lower():
+                self.t0SpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
+            elif "gradient " in line.lower(): # Each line is a gradient column
+                v = str.split(line.strip(), ":")[-1].strip()
+                v = str.split(v, " ")
+                tg.append(float(v[0]))
+                grad.append([float(v[1])/100., float(v[2])/100.])
+            else:
                 v = nsplit(line.strip(), self.splitlineby.currentText())
-                if i == 0:
-                    for item in v[1:-1]:
-                        tg.append(float(item))
-                else:
+                trdata.append(list())
+                if self.firstcolobjname.isChecked():
                     molname.append(v[0])
-                    trdata.append(list())
                     for item in v[1:-1]:
                         trdata[-1].append(float(item))
-                i += 1
-            f.close()
-        else:
-            f = open(self.lineEdit.text())
-            self.tablemodel.clean()
-            i = 0
-            trdata = []
-            for line in f:
-                v = nsplit(line.strip(), self.splitlineby.currentText())
-                if i == 0:
-                    for item in v:
-                        tg.append(float(item))
                 else:
-                    molname.append("Molecule %d" % (i))
-                    trdata.append(list())
+                    molname.append("Molecule %d" % (i+1))
                     for item in v:
                         trdata[-1].append(float(item))
                 i += 1
-            f.close()
+        f.close()
 
         return [self.lineEdit_2.text(), molname, trdata, grad, tg,
                 self.dwelVolSpinBox.value(), self.t0SpinBox.value(),

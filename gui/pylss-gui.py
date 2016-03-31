@@ -56,7 +56,7 @@ class Data(object):
 class Model(object):
     def __init__(self):
         self.modname = ""
-        self.objnamelst = []
+        self.molname = []
         self.v_m = 0
         self.v_d = 0
         self.lss = []
@@ -101,7 +101,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         # set the layout
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.canvas)
-        self.plotterBox.setLayout(layout)
+        self.framePlot.setLayout(layout)
 
         self.tablemodel = TableModel(self)
         self.tableView.setModel(self.tablemodel)
@@ -175,21 +175,16 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                 molname = self.datalst[self.current_lst_index].molname
                 trdata = self.datalst[self.current_lst_index].trdata
                 grad = self.datalst[self.current_lst_index].grad
-                self.tablemodel.header.append("Molecules")
-                for i in range(len(grad)):
-                    self.tablemodel.header.append("tR %d" % (int(grad[i]*100)))
-                if len(molname) > 0:
-                    for i in range(len(trdata)):
-                        row = [molname[i]]
-                        for j in range(len(trdata[i])):
-                            row.append(trdata[i][j])
-                        self.tablemodel.addRow(row)
-                else:
-                    for i in range(len(trdata)):
-                        row = ["Molecule %d" % (i)]
-                        for j in range(len(trdata[i])):
-                            row.append(trdata[i][j])
-                        self.tablemodel.addRow(row)
+                tg = self.datalst[self.current_lst_index].tg
+                header = ["Molecule"]
+                for j in range(len(tg)):
+                    header.append("%.1f%%-%.1f%%-%d min" % (round(grad[j][0]*100,1), round(grad[j][1]*100,1), tg[j]))
+                self.tablemodel.setHeader(header)
+                for i in range(len(trdata)):
+                    row = [molname[i]]
+                    for j in range(len(trdata[i])):
+                        row.append(round(trdata[i][j], 2))
+                    self.tablemodel.addRow(row)
                 self.tableView.model().layoutChanged.emit()
         else:
             del self.tablemodel.arraydata[:]
@@ -223,14 +218,15 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
             self.modellst.append(Model())
             self.modellst[-1].modname = modelname
+            self.modellst[-1].molname = self.datalst[indx].molname
             self.modelBox.addItem(modelname)
 
             tg = self.datalst[indx].tg
             init_B = []
             final_B = []
             for i in range(len(tg)):
-                init_B.append(self.datalst[indx].grad[0])
-                final_B.append(self.datalst[indx].grad[1])
+                init_B.append(self.datalst[indx].grad[i][0])
+                final_B.append(self.datalst[indx].grad[i][1])
 
             self.modellst[-1].v_d = v_d
             self.modellst[-1].v_m = t0 * flow
@@ -251,13 +247,11 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         del self.tablemodel.arraydata[:]
         del self.tablemodel.header[:]
         self.tablemodel.clean()
-        self.tablemodel.header.append("Molecule")
-        self.tablemodel.header.append("Log kW")
-        self.tablemodel.header.append("S")
-        self.tablemodel.header.append("tR")
-
+        header = ["Molecule", "log kW", "S", "tR"]
+        self.tablemodel.setHeader(header)
         self.tableView.model().layoutChanged.emit()
         if indx >= 0 and indx < len(self.modellst):
+            molname = self.modellst[indx].molname
             lss = self.modellst[indx].lss
             flow_sofware = float(self.doubleSpinBox_1.value())
             init_B_soft = float(self.doubleSpinBox_2.value())/100.
@@ -288,21 +282,57 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
             trtab = []
             lssmol = LinearGenerator(None, None, None, t0_soft, float(self.modellst[indx].v_d), flow_sofware)
-            i = 1
+            i = 0
+            tr_tmp = []
             for row in lss:
                 lss_logkw = float(row[0])
                 lss_s = float(row[1])
                 b = (t0_soft*(final_B_soft-init_B_soft)*lss_s)/tg_soft
-                # See D. Guillazne et al / J. Chromatogr. A 1216(2009) 3232-3243
+                # See D. Guillaume et al / J. Chromatogr. A 1216(2009) 3232-3243
                 W = (4*t0_soft)/sqrt(N)* (1+ 1/(2.3*b))/4
                 trtab.append([lssmol.rtpred(lss_logkw, lss_s, tg_soft, init_B_soft, final_B_soft, t0_soft, td_soft), A, W])
-                row = ["Molecule %d" % (i), lss_logkw, lss_s, trtab[-1][0]]
+                tr_tmp.append([round(trtab[-1][0], 2), i])
+                row = [molname[i], round(lss_logkw, 3), round(lss_s, 3), round(trtab[-1][0],2)]
                 self.tablemodel.addRow(row)
                 self.tableView.model().layoutChanged.emit()
                 i += 1
 
+            tr_tmp = sorted(tr_tmp, key=lambda x:x[0])
+            # get min and max time
+            tr_min = tr_tmp[0][0]
+            tr_max = tr_tmp[-1][0]
+            # calculate resolution and critical couple
+            small_rs = tr_tmp[1][0] - tr_tmp[0][0]
+            mol_a = 0
+            mol_b = 1
+            for i in range(2, len(tr_tmp)):
+                tmp = tr_tmp[i][0] - tr_tmp[i-1][0]
+                if tmp < small_rs:
+                    mol_a = tr_tmp[i-1][1]
+                    mol_b = tr_tmp[i][1]
+                    small_rs = tmp
+                else:
+                    continue
+
+            text = "Critical resolution: %f\n" % (small_rs)
+            text += "Molecules:\n"
+            text += "  - %s  %f min\n" % (molname[mol_a], trtab[mol_a][0])
+            text += "  - %s  %f min\n" % (molname[mol_b], trtab[mol_b][0])
+            self.plainTextEdit.document().setPlainText(text)
+
+            crit_trtab = []
+            if mol_a > mol_b:
+                crit_trtab.append(trtab.pop(mol_b))
+                crit_trtab.append(trtab.pop(mol_a-1))
+            else:
+                crit_trtab.append(trtab.pop(mol_a))
+                crit_trtab.append(trtab.pop(mol_b-1))
             peaks = BuildChromatogram(trtab, tg_soft, 0.01)
             peaks = zip(*peaks)
+
+            crit_peaks = BuildChromatogram(crit_trtab, tg_soft, 0.01)
+            crit_peaks = zip(*crit_peaks)
+
             y = []
             x = []
             for i in range(len(peaks)):
@@ -312,12 +342,23 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                 for j in range(1, len(peaks[0])):
                     y[-1] += peaks[i][j]
 
+            crit_y = []
+            crit_x = []
+            for i in range(len(crit_peaks)):
+                crit_x.append(crit_peaks[i][0])
+                crit_y.append(0.)
+                len(peaks[0])
+                for j in range(1, len(crit_peaks[0])):
+                    crit_y[-1] += crit_peaks[i][j]
             ax = self.figure.add_subplot(111)
             ax.hold(False)
-            ax.plot(x, y, '-')
+            ax.plot(x, y, "b", crit_x, crit_y, "r")
+
+            #ax.plot(x, y, '-', color='blue')
+            #ax.plot(crit_x, crit_y, '-', color='red')
             plt.xlabel('Time')
             plt.ylabel('Signal')
-
+            plt.xlim([tr_min-((tr_min*20.)/100.), tr_max+((tr_max*20.)/100.)])
             self.canvas.draw()
             #self.plotchromatogram()
 

@@ -24,6 +24,9 @@ class TableModel(QtCore.QAbstractTableModel):
     def clean(self):
         del self.arraydata[:]
 
+    def setHeader(self, header):
+        self.header = header
+
     def addRow(self, row):
         self.arraydata.append(list())
         for item in row:
