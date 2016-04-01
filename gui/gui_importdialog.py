@@ -130,7 +130,7 @@ class Ui_ImportDialog(object):
         QtCore.QMetaObject.connectSlotsByName(ImportDialog)
 
     def retranslateUi(self, ImportDialog):
-        ImportDialog.setWindowTitle(_translate("ImportDialog", "Dialog", None))
+        ImportDialog.setWindowTitle(_translate("ImportDialog", "Import retention data", None))
         self.splitlineby.setItemText(0, _translate("ImportDialog", ";", None))
         self.splitlineby.setItemText(1, _translate("ImportDialog", "TAB", None))
         self.splitlineby.setItemText(2, _translate("ImportDialog", "SPACE", None))

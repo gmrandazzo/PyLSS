@@ -54,7 +54,7 @@ class Ui_MainWindow(object):
         self.gridLayout_8.addWidget(self.listView, 1, 0, 1, 2)
         self.toolBox.addItem(self.page, _fromUtf8(""))
         self.page_2 = QtGui.QWidget()
-        self.page_2.setGeometry(QtCore.QRect(0, 0, 240, 558))
+        self.page_2.setGeometry(QtCore.QRect(0, 0, 225, 459))
         self.page_2.setObjectName(_fromUtf8("page_2"))
         self.gridLayout_5 = QtGui.QGridLayout(self.page_2)
         self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
@@ -257,7 +257,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
+        MainWindow.setWindowTitle(_translate("MainWindow", "PyLSS", None))
         self.settingBox.setTitle(_translate("MainWindow", "Settings", None))
         self.addButton.setText(_translate("MainWindow", "Add", None))
         self.removeButton.setText(_translate("MainWindow", "Remove", None))
