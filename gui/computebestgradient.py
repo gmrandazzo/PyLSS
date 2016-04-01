@@ -49,24 +49,33 @@ class ComputeBestGradient(QtGui.QDialog, Ui_ComputeBestGradient):
 
     def calculate(self):
         indx = self.modelBox.currentIndex()
-        flow_min = self.flowMinSpinBox.value()
-        flow_max = self.flowMaxSpinBox.value()
-        grad_start_min = self.GStartMinSpinBox.value()/100.
-        grad_start_max = self.GSartMaxSpinBox.value()/100.
-        grad_stop_min = self.GStoptMinSpinBox.value()/100.
-        grad_stop_max = self.GStopMaxSpinBox.value()/100.
-        time_min = self.timeMinSpinBox.value()
-        time_max = self.timeMaxSpinBox.value()
 
         logkw_s_tab = self.models[indx].lss
         v_m = self.models[indx].v_m
         v_d = self.models[indx].v_d
+        flow = self.models[indx].flow
 
-        opt = OptSep(v_m, v_d, flow_min, logkw_s_tab)
-        [gcondlst, rslst, trlst] = opt.getplotgradientconditions(flow_min, flow_max, grad_start_min, grad_start_max, grad_stop_min, grad_stop_max, time_min, time_max)
+        opt = OptSep(v_m, v_d, flow, logkw_s_tab)
+        best_gcond, tr, rs_avg = opt.getgradientconditions(self.tr_min.value(), self.tr_max.value())
 
-        #gcondlst.append([init_b, final_b, tg, flow])
-        #rslst.append(small_rs)
+        init_b = best_gcond[0]
+        final_b = best_gcond[1]
+        tg = best_gcond[2]
+        flow = best_gcond[3]
+
+        # Constant flow!
+        flow_min = flow-(flow*0.2)
+        flow_max = flow+(flow*0.2)
+        grad_start_min = init_b-(init_b*0.2)
+        grad_stop_min = init_b+(init_b*0.2)
+        grad_start_max = final_b-(final_b*0.2)
+        grad_stop_max = final_b+(final_b*0.2)
+
+        tg_min = tg-(tg*0.2)
+        tg_max = tg+(tg*0.2)
+
+        [gcondlst, rslst, trlst] = opt.getplotgradientconditions(flow_min, flow_max, grad_start_min, grad_start_max, grad_stop_min, grad_stop_max, tg_min, tg_max)
+
         plt.clf()
         ax = self.figure.gca(projection='3d')
         #X = np.arange(-5, 5, 0.25)
@@ -77,7 +86,7 @@ class ComputeBestGradient(QtGui.QDialog, Ui_ComputeBestGradient):
         for i in range(len(gcondlst)):
             row = gcondlst[i]
             X.append(100 * ((row[1]-row[0])/row[2]))
-            Y.append(row[3])
+            Y.append(row[0])
             if rslst[i] == -9999:
                     Z.append(0)
             else:
@@ -95,15 +104,15 @@ class ComputeBestGradient(QtGui.QDialog, Ui_ComputeBestGradient):
         self.figure.colorbar(scatterplot, shrink=0.5, aspect=5)
 
         ax.hold(False)
-        ax.set_xlabel('Gradient Steepness')
-        ax.set_ylabel('Flow rate')
-        ax.set_zlabel('Rs')
+        ax.set_xlabel('Gradient slope %%/min')
+        ax.set_ylabel('%%initial of gradient')
+        ax.set_zlabel('Resolution')
 
         self.canvas.draw()
 
         best = Z.index(max(Z))
-        self.doubleSpinBox_5.setValue(((gcondlst[best][1]-gcondlst[best][0])/gcondlst[best][2]) *100)
-        self.doubleSpinBox_1.setValue(gcondlst[best][0]*100)
-        self.doubleSpinBox_2.setValue(gcondlst[best][1]*100)
-        self.doubleSpinBox_3.setValue(gcondlst[best][2])
-        self.doubleSpinBox_4.setValue(gcondlst[best][3])
+        self.doubleSpinBox_5.setValue(rs_avg)
+        self.doubleSpinBox_1.setValue(init_b*100)
+        self.doubleSpinBox_2.setValue(final_b*100)
+        self.doubleSpinBox_3.setValue(tg)
+        self.doubleSpinBox_4.setValue(flow)

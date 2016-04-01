@@ -56,11 +56,7 @@ Chromatography.
 #from scipy.optimize import fmin
 from optimizer import simplex as fmin
 from math import sqrt, pi, log10, log, exp, fabs, isnan, isinf, erf
-from optseparation import drange
-
-def square(val):
-    """ return the square of val"""
-    return val*val
+from miscalgoritms import *
 
 class LinearGenerator(object):
     """Perform the generation of LSS parameters logKw and S

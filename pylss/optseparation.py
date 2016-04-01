@@ -11,14 +11,9 @@ automatically trough the L-BFGS-B method.
 '''
 
 from optimizer import simplex as fmin
+from lssengine import LinearGenerator
 from math import sqrt, log10, fabs, isnan, isinf
-
-def drange(start, stop, step):
-    """ create a list of float arithmetic progress"""
-    r = start
-    while r < stop:
-        yield r
-        r += step
+from miscalgoritms import *
 
 class OptSep(object):
     """Perform the optimization of a separation using the LSS parameters
@@ -96,8 +91,13 @@ class OptSep(object):
         self.kisomax = 20  # the compound stay too much in the stationary phase
         self.mintg = 1
         self.maxtg = 60
-        self.minflow = 0.1
-        self.maxflow = 1
+        self.minflow = 0.2
+        self.maxflow = 0.6
+        self.c_lenght = 15 #cm
+        self.c_particle = 1.7 #um
+        self.tr_min = 1
+        self.tr_max = 60
+
     def isocratic_iterfun(self, phi):
         """ Iterative function which minimize the rs.
         This function will take into account also the
@@ -137,7 +137,7 @@ class OptSep(object):
     def getisoconditions(self):
         """ Optimizer function starting
         from the 10% of organic modifier"""
-        if len(self.temp) > 1: # According to de Vant Hoff
+        if len(self.temp) > 1: # Two temperature experiments according to de Vant Hoff
             return 0
         else: # one temperature experiment
             phi = fmin(self.isocratic_iterfun, [0.2], side=[0.1], tol=1e-10)
@@ -183,115 +183,104 @@ class OptSep(object):
         return phirs
 
 
-    def gradient_iterfun(self, gcond):
-        """ Iterative function to scan for get the
-        best gradient conditions.
-        gcond is a vector which contain the conditions
-
-        tr = t0/b * log10(2.3*k0*b)+t0+td
-
-        b = (Vm * DeltaFi * S) / (tg*F)
-
-        log10(k) = log10(kw) + S*Fi => log10(k0) = log10(kww) + S*Fi0
-        Rs = 1/4 * [k2 / (1+k2)] * (alpha -1) * sqrt(N)
-        """
-        for item in gcond:
-            if item > 0:
-                continue
-            else:
-                return 9999
-
-        init_b = gcond[0]
-        final_b = gcond[1]
-        tg = gcond[2]
-        flow = gcond[3]
-        if init_b < 0 or final_b < 0 or init_b > final_b or fabs(init_b - final_b) < 1e-1 or tg < self.mintg or tg > self.maxtg or flow < self.minflow or flow > self.maxflow:
+    def get_gradient_rs(self, grad):
+        """ Function to optimise gradient trough simplex iteration """
+        init_b = grad[0]
+        final_b = grad[1]
+        tg = grad[2]
+        flow = grad[3]
+        if final_b > 1 or final_b < 0 or init_b < 0 or init_b > 1 or flow < 0 or tg < 0:
             return 9999
         else:
-		    # Function calculation
             deltafi = final_b - init_b
             t0 = self.v_m/flow
-            td = self.v_d/flow
-            tr = []
-            kstar = []
+            td = self.v_m/flow
+            N = (self.c_lenght*10000.)/(2.3*self.c_particle)
+            trtab = []
+            lssmol = LinearGenerator(None, None, None, t0, self.v_d, flow)
+            i = 0
             for row in self.logkw_s_tab:
-                b = (self.v_m * deltafi * row[1]) / (tg*flow)
-                kstar.append(float(1.0/(2.3*b)))
-                logk0 = row[0] - (row[1] * init_b)
-                k0 = float(pow(10, logk0))
-                tr_tmp = ((t0/b) * log10(2.3*k0*b)) + t0 + td
-                if tr_tmp < 0 or isnan(tr_tmp) == True or isinf(tr_tmp) == True or tr_tmp > tg or tr_tmp < t0:
-                    continue
-                else:
-                    tr.append(float(tr_tmp))
+                lss_logkw = float(row[0])
+                lss_s = float(row[1])
+                b = (t0*(final_b-init_b)*lss_s)/tg
+                # See D. Guillaume et al / J. Chromatogr. A 1216(2009) 3232-3243
+                W = (4*t0)/sqrt(N)* (1+ 1/(2.3*b))/4
+                try:
+                    trtab.append([lssmol.rtpred(lss_logkw, lss_s, tg, init_b, final_b, t0, td), W, i])
+                except:
+                    trtab.append([9999, W, i])
+                i += 1
 
 
-		    # Resolution will be calculated according to the fundamental equation of chromatography
-            if len(tr) == len(self.logkw_s_tab):
-                print len(tr), len(self.logkw_s_tab)
-                tr.sort()
-                small_rs = tr[-1] - tr[0]
+            trtab = sorted(trtab, key=lambda x:x[0])
 
-                #rs = []
-                #for i in range(1, len(tr)):
-                #    width1 = t0/sqrt(self.plate) * (1 + kstar[i])
-                #    width2 = t0/sqrt(self.plate) * (1 + kstar[i-1])
-                #    rs.append((2.*(tr[i]-tr[i-1]))/(width1+width2))
-			    # Search the critical couple
-                #small_rs = max(rs)
-                #for i in range(len(rs)):
-                #    if rs[i] < small_rs and rs[i] > 0:
-                #        small_rs = rs[i]
-                #    else:
-                #        continue
 
-                return 1/small_rs
+            # get min and max time
+            tr_min = trtab[0][0]
+            tr_max = trtab[-1][0]
+            if tr_min > self.tr_min and tr_max < self.tr_max and tr_min > t0 and tr_max < tg:
+                #minimise the inverse of the sum of the resolutions
+                width1 = trtab[1][1]
+                width2 = trtab[1-1][1]
+                tr1 = trtab[1-1][0]
+                tr2 = trtab[1][0]
+                rs = (2.*(tr2-tr1)) / (width1+width2)
+                for i in range(1, len(trtab)):
+                    width1 = trtab[i][1]
+                    width2 = trtab[i-1][1]
+                    tr1 = trtab[i-1][0]
+                    tr2 = trtab[i][0]
+                    tmp_rs = (2.*(tr2-tr1)) / (width1+width2)
+                    if tmp_rs < rs:
+                        rs = tmp_rs
+                    else:
+                        continue
+                return 1.0/(rs)
             else:
                 return 9999
 
-    def getgradientconditions(self):
+
+    def getgradientconditions(self, tr_min, tr_max):
 	"""
 	Optimize the gradient conditions
 	finding different value of flow rate,
 	initial and final organic solvent and time gradient.
 	The equation to be used are these and the equation for the resolution
 	it is the same of the isocratic conditions.
-	"""
-        rslst = []
-        gcondlst = []
-        for init_b in drange(0.05, 0.60, 0.05):
-            for final_b in drange(init_b+0.05, 0.95, 0.05):
-                for tg in drange(1, self.maxtg, 1):
-                    for flow in drange(0.1, self.maxflow, 0.05):
+    """
+        self.tr_min = tr_min
+        self.tr_max = tr_max
+        best_rs = None
+        best_gcond = None
+        for init_b in drange(0.00, 1.0, 0.1):
+            for final_b in drange(init_b+0.1, 1.0, 0.1):
+                for tg in drange(1, self.maxtg, 9):
+                    for flow in drange(0.1, self.maxflow, 0.1):
                         gcond = [init_b, final_b, tg, flow]
-                        tmp_bestgcond = fmin(self.gradient_iterfun, gcond, side=[0.1, 0.1, 0.1], tol=1e-10)
-                        #tmp_bestgcond = fmin(self.gradient_iterfun, gcond, xtol=1e-3)
-                        rslst.append(1/self.gradient_iterfun(tmp_bestgcond))
-                        gcondlst.append(tmp_bestgcond)
+                        try:
+                            tmp_bestgcond = fmin(self.get_gradient_rs, gcond, side=[0.05, 0.05, 1, 0.1], tol=1e-10)
+                            tmp_rs = self.get_gradient_rs(tmp_bestgcond)
+                            if best_rs != None:
+                                if tmp_rs < best_rs:
+                                    best_rs = tmp_rs
+                                    best_gcond = tmp_bestgcond
+                                else:
+                                    continue
+                            else:
+                                best_gcond = tmp_bestgcond
+                                best_rs = tmp_rs
+                        except:
+                            continue
 
-        indx = rslst.index(max(rslst))
-        bestgcond = gcondlst[indx]
-
-        #init_b = 0.25 # 5%
-        #final_b = 0.60 # 95 %
-        #tg = 16 # 2 min defailt
-        #flow = 0.6 # ml/min default
-        #gcond = [init_b, final_b, tg, flow]
-
-        #from scipy.optimize import fmin_l_bfgs_b
-        #bounds = [(0.05, 0.95), (0.05, 0.95), (3, 40), (0.2, 1.5)] #CONSTRAINT
-        #res = fmin_l_bfgs_b(self.gradient_iterfun, gcond, bounds, approx_grad=True, epsilon=0.01)
-        #bestgcond = list(res[0])
-
-        #from scipy.optimize import fmin
-        #bestgcond = fmin(self.gradient_iterfun, gcond, xtol=1e-3)
-
-        #bestgcond = fmin(self.gradient_iterfun, gcond, side=[0.01, 0.01, 1, 0.05], tol=1e-10)
-
-        init_b = bestgcond[0]
-        final_b = bestgcond[1]
-        tg = bestgcond[2]
-        flow = bestgcond[3]
+        #self.tr_min = float(tr_min)
+        #self.tr_max = float(tr_max)
+        #gcond = [0.05, 0.95, 60, 0.3]
+        #best_gcond = fmin(self.get_gradient_rs, gcond, side=[0.05, 0.05, 1, 0.1], tol=1e-10)
+        #best_rs = self.get_gradient_rs(best_gcond)
+        init_b = best_gcond[0]
+        final_b = best_gcond[1]
+        tg = best_gcond[2]
+        flow = best_gcond[3]
 
 		# Function calculation
         deltafi = final_b - init_b
@@ -303,53 +292,53 @@ class OptSep(object):
             b = float((self.v_m * deltafi * row[1]) / (tg*flow))
             k0 = pow(10, row[0] - (row[1] * init_b))
             tr.append(((t0/b) * log10(2.3*k0*b)) + t0 + td)
+        return best_gcond, tr, 1/best_rs
 
-        return bestgcond, tr, 1/self.gradient_iterfun(bestgcond)
-
-    def getplotgradientconditions(self, flow_min=0.2, flow_max=1, g_start_min=0.05, grad_start_max=0.95,
-                                  g_stop_min=0.1, g_stop_max=0.95, time_min=2, time_max=60):
+    def getplotgradientconditions(self, flow_min=0.2, flow_max=0.6, g_start_min=0.00, g_start_max=0.98,
+                                  g_stop_min=0.0, g_stop_max=0.98, time_grad_min=2, time_grad_max=60):
         """ Plot the Rs function of the different parameters
 	    to optimize under gradient conditions
         """
         gcondlst = []
         rslst = []
         trlst = []
-        for init_b in drange(g_start_min, grad_start_max, 0.1):
-            for final_b in drange(g_stop_min, g_stop_max, 0.1):
-                for tg in drange(time_min, time_max,  1):
+        d_init_b = (g_start_max - g_start_min)/20.
+        d_final_b = (g_stop_max-g_stop_min)/20.
+        N = (self.c_lenght*10000.)/(2.3*self.c_particle)
+        for init_b in drange(g_start_min, g_start_max, 0.05):
+            for final_b in drange(g_stop_min+init_b, g_stop_max, 0.05):
+                for tg in drange(time_grad_min, time_grad_max,  1):
                     for flow in drange(flow_min, flow_max, 0.1):
                         # Function calculation
                         deltafi = final_b - init_b
                         t0 = self.v_m/flow
                         td = self.v_d/flow
-                        tr = []
-                        kstar = []
+                        trtab = []
+                        i = 0
+                        lssmol = LinearGenerator(None, None, None, t0, self.v_d, flow)
                         for row in self.logkw_s_tab:
-                            b = (self.v_m * deltafi * row[1]) / (tg*flow)
-                            kstar.append(float(1.0/(2.3*b)))
-                            k0 = pow(10, row[0] - row[1] * init_b)
-                            try:
-                                tr_tmp = ((t0/b) * log10(2.3*k0*b)) + t0 + td
-                            except:
-                                tr_tmp = -1
-
-
-                            if fabs(init_b - final_b) < 1e-1 or tr_tmp < 0 or isnan(tr_tmp) == True or isinf(tr_tmp) == True or tr_tmp > tg or tr_tmp < t0:
-                                continue
-                            else:
-                                tr.append(float(tr_tmp))
+                            lss_logkw = float(row[0])
+                            lss_s = float(row[1])
+                            b = (t0*(final_b-init_b)*lss_s)/tg
+                            # See D. Guillaume et al / J. Chromatogr. A 1216(2009) 3232-3243
+                            W = (4*t0)/sqrt(N)* (1+ 1/(2.3*b))/4
+                            trtab.append([lssmol.rtpred(lss_logkw, lss_s, tg, init_b, final_b, t0, td), W, i])
+                            i += 1
 
                         # Resolution will be calculated according to the fundamental equation of chromatography
-                        if len(tr) == len(self.logkw_s_tab):
-                            trlst.append(tr)
-                            tr.sort()
+                        if len(trtab) == len(self.logkw_s_tab):
+                            trlst.append(list())
+                            for i in range(len(trtab)):
+                                trlst[-1].append(trtab[i][0])
+                            trtab = sorted(trtab, key=lambda x:x[0])
                             rs = []
-                            for i in range(1, len(tr)):
-                                width1 = t0/sqrt(self.plate) * (1 + kstar[i])
-                                width2 = t0/sqrt(self.plate) * (1 + kstar[i-1])
-                                rs.append((2.*(tr[i]-tr[i-1]))/(width1+width2))
+                            for i in range(1, len(trtab)):
+                                width1 = trtab[i][1]
+                                width2 = trtab[i-1][1]
+                                tr1 = trtab[i-1][0]
+                                tr2 = trtab[i][0]
+                                rs.append((2.*(tr2-tr1))/(width1+width2))
                             # Search the critical couple
-
                             small_rs = max(rs)
                             for i in range(len(rs)):
                                 if rs[i] < small_rs and rs[i] > 0:
@@ -359,60 +348,6 @@ class OptSep(object):
                             gcondlst.append([init_b, final_b, tg, flow])
                             rslst.append(small_rs)
                         else:
-                            gcondlst.append([init_b, final_b, tg, flow])
-                            rslst.append(-9999)
-                            trlst.append(tr)
+                            continue
+
         return gcondlst, rslst, trlst
-
-    def getplotselectivitygradientconditions(self):
-        """ Plot the selectivity alpha function of the different parameters:
-        - initial B
-        - gradient steepness
-        """
-        gcondlst = []
-        alphalst = []
-        trlst = []
-        for init_b in drange(0.05, 0.90, 0.05):
-            for final_b in drange(init_b+0.05, 0.95, 0.05):
-                for tg in drange(1, self.maxtg,  1):
-                    for flow in drange(0.1, self.maxflow, 0.1):
-                        # Function calculation
-                        deltafi = final_b - init_b
-                        t0 = self.v_m/flow
-                        td = self.v_d/flow
-                        tr = []
-                        for row in self.logkw_s_tab:
-                            b = (self.v_m * deltafi * row[1]) / (tg*flow)
-                            k0 = pow(10, row[0] - row[1] * init_b)
-                            try:
-                                tr_tmp = ((t0/b) * log10(2.3*k0*b)) + t0 + td
-                            except:
-                                tr_tmp = -1
-
-                            if fabs(init_b - final_b) < 1e-1 or tr_tmp < 0 or isnan(tr_tmp) == True or isinf(tr_tmp) == True or tr_tmp > tg or tr_tmp < t0:
-                                continue
-                            else:
-                                tr.append(float(tr_tmp))
-
-                        # Resolution will be calculated according to the fundamental equation of chromatography
-                        if len(tr) == len(self.logkw_s_tab):
-                            trlst.append(tr)
-                            tr.sort()
-                            alpha = []
-                            for i in range(1, len(tr)):
-                                alpha.append(tr[i]/tr[i-1])
-                            # Search the critical selectivity
-
-                            small_alpha = max(alpha)
-                            for i in range(len(alpha)):
-                                if alpha[i] < small_alpha and alpha[i] > 0:
-                                    small_alpha = alpha[i]
-                                else:
-                                    continue
-                            gcondlst.append([init_b, final_b, tg, flow])
-                            alphalst.append(small_alpha)
-                        else:
-                            gcondlst.append([init_b, final_b, tg, flow])
-                            alphalst.append(-9999)
-                            trlst.append(tr)
-        return gcondlst, alphalst, trlst

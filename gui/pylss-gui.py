@@ -59,6 +59,7 @@ class Model(object):
         self.molname = []
         self.v_m = 0
         self.v_d = 0
+        self.flow = 0
         self.lss = []
 
 class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
@@ -101,7 +102,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         # set the layout
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.canvas)
-        self.framePlot.setLayout(layout)
+        self.plotterBox.setLayout(layout)
 
         self.tablemodel = TableModel(self)
         self.tableView.setModel(self.tablemodel)
@@ -219,6 +220,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             self.modellst.append(Model())
             self.modellst[-1].modname = modelname
             self.modellst[-1].molname = self.datalst[indx].molname
+            self.modellst[-1].flow = self.datalst[indx].flow
             self.modelBox.addItem(modelname)
 
             tg = self.datalst[indx].tg
@@ -291,7 +293,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                 # See D. Guillaume et al / J. Chromatogr. A 1216(2009) 3232-3243
                 W = (4*t0_soft)/sqrt(N)* (1+ 1/(2.3*b))/4
                 trtab.append([lssmol.rtpred(lss_logkw, lss_s, tg_soft, init_B_soft, final_B_soft, t0_soft, td_soft), A, W])
-                tr_tmp.append([round(trtab[-1][0], 2), i])
+                tr_tmp.append([round(trtab[-1][0], 2), W, i])
                 row = [molname[i], round(lss_logkw, 3), round(lss_s, 3), round(trtab[-1][0],2)]
                 self.tablemodel.addRow(row)
                 self.tableView.model().layoutChanged.emit()
@@ -302,22 +304,32 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             tr_min = tr_tmp[0][0]
             tr_max = tr_tmp[-1][0]
             # calculate resolution and critical couple
-            small_rs = tr_tmp[1][0] - tr_tmp[0][0]
+
+            width1 = tr_tmp[0][1]
+            width2 = tr_tmp[1][1]
+            tr1 = tr_tmp[0][0]
+            tr2 = tr_tmp[1][0]
+            small_rs = (2.*(tr2-tr1)) / (width1+width2)
             mol_a = 0
             mol_b = 1
-            for i in range(2, len(tr_tmp)):
-                tmp = tr_tmp[i][0] - tr_tmp[i-1][0]
-                if tmp < small_rs:
-                    mol_a = tr_tmp[i-1][1]
-                    mol_b = tr_tmp[i][1]
-                    small_rs = tmp
+            for i in range(1, len(tr_tmp)):
+                width1 = tr_tmp[i][1]
+                width2 = tr_tmp[i-1][1]
+                tr1 = tr_tmp[i-1][0]
+                tr2 = tr_tmp[i][0]
+                tmp_rs = (2.*(tr2-tr1)) / (width1+width2)
+                if tmp_rs < small_rs:
+                    small_rs = tmp_rs
+                    mol_a = tr_tmp[i-1][2]
+                    mol_b = tr_tmp[i][2]
                 else:
                     continue
 
+
             text = "Critical resolution: %f\n" % (small_rs)
             text += "Molecules:\n"
-            text += "  - %s  %f min\n" % (molname[mol_a], trtab[mol_a][0])
-            text += "  - %s  %f min\n" % (molname[mol_b], trtab[mol_b][0])
+            text += "  - %s  %.2f min\n" % (molname[mol_a], round(trtab[mol_a][0], 2))
+            text += "  - %s  %.2f min\n" % (molname[mol_b], round(trtab[mol_b][0], 2))
             self.plainTextEdit.document().setPlainText(text)
 
             crit_trtab = []
@@ -358,7 +370,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             #ax.plot(crit_x, crit_y, '-', color='red')
             plt.xlabel('Time')
             plt.ylabel('Signal')
-            plt.xlim([tr_min-((tr_min*20.)/100.), tr_max+((tr_max*20.)/100.)])
+            plt.xlim([tr_min-((tr_min*10.)/100.), tr_max+((tr_max*10.)/100.)])
             self.canvas.draw()
             #self.plotchromatogram()
 
