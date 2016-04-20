@@ -61,7 +61,6 @@ class ComputeBestGradient(QtGui.QDialog, Ui_ComputeBestGradient):
         init_b = best_gcond[0]
         final_b = best_gcond[1]
         tg = best_gcond[2]
-        flow = best_gcond[3]
 
         # Constant flow!
         flow_min = flow-(flow*0.2)
@@ -104,8 +103,8 @@ class ComputeBestGradient(QtGui.QDialog, Ui_ComputeBestGradient):
         self.figure.colorbar(scatterplot, shrink=0.5, aspect=5)
 
         ax.hold(False)
-        ax.set_xlabel('Gradient slope %%/min')
-        ax.set_ylabel('%%initial of gradient')
+        ax.set_xlabel('Gradient slope %/min')
+        ax.set_ylabel('% initial of gradient')
         ax.set_zlabel('Resolution')
 
         self.canvas.draw()

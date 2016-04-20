@@ -19,11 +19,11 @@ pyz = PYZ(a.pure, a.zipped_data,
 exe = EXE(pyz,
           a.scripts,
           exclude_binaries=True,
-          name='pylss-gui',
+          name='pylss-gui.exe',
           debug=False,
           strip=False,
           upx=True,
-          console=False, 
+          console=False,
           icon='pylss.ico')
 
 coll = COLLECT(exe,

@@ -60,5 +60,8 @@ class TableModel(QtCore.QAbstractTableModel):
 
     def headerData(self, col, orientation, role):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self.header[col]
+            if col < len(self.header):
+                return self.header[col]
+            else:
+                return None
         return None

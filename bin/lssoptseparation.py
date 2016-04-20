@@ -42,15 +42,15 @@ def main():
         tg = []
         for line in fi:
             if "Column Lenght" in line:
-                c_length = str.split(line.strip(), ":")[-1].strip()
+                c_length = float(str.split(line.strip(), ":")[-1].strip())
             elif "Column Diamter" in line:
-                c_diameter = str.split(line.strip(), ":")[-1].strip()
+                c_diameter = float(str.split(line.strip(), ":")[-1].strip())
             elif "Column Porosity" in line:
-                c_porosity = str.split(line.strip(), ":")[-1].strip()
-            elif "Dwell Volume " in line:
-                v_d = str.split(line.strip(), ":")[-1].strip()
+                c_porosity = float(str.split(line.strip(), ":")[-1].strip())
+            elif "Dwell Volume" in line:
+                v_d = float(str.split(line.strip(), ":")[-1].strip())
             elif "Flow Rate" in line:
-                flow = str.split(line.strip(), ":")[-1].strip()
+                flow = float(str.split(line.strip(), ":")[-1].strip())
             elif "Gradient " in line:
                 v = str.split(line.strip(), ":")[-1].strip()
                 v = str.split(v, " ")
@@ -80,7 +80,7 @@ def main():
             print "%.2f" % (time)
         print "_"*20
 
-        [gcond, tr, Rs] = opt.getgradientconditions()
+        [gcond, tr, Rs] = opt.getgradientconditions(1, 10)
 
         #[gconds, rs] = opt.getplotgradientconditions()
         #indx = rs.index(max(rs))
@@ -89,7 +89,7 @@ def main():
         #Rs = max(rs)
 
         print "Best Gradient Conditions with Rs: %f" % (Rs)
-        print "init B: %f\nfinal B: %f\nTime Gradient: %f\nFlow rate:%f\nt0: %f" % (gcond[0], gcond[1], gcond[2], gcond[3], opt.v_m/gcond[3])
+        print " init B: %f\n final B: %f\n Time Gradient: %f\n Flow rate:%f\n t0: %f" % (gcond[0], gcond[1], gcond[2], flow, opt.v_m/flow)
         for time in tr:
             print "%.2f" % (time)
 

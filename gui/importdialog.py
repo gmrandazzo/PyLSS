@@ -26,6 +26,7 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
         self.okButton.clicked.connect(self.ok_)
         self.splitlineby.currentIndexChanged.connect(self.preview)
         self.lineEdit.textChanged.connect(self.preview)
+        self.firstcolobjname.stateChanged.connect(self.preview)
 
     def open_(self):
         fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file')
@@ -65,19 +66,25 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
                     if i == 0:
                         header = []
                         header.append("Molecule")
-                        for j in range(len(v)):
-                            header.append("%.1f%%-%.1f%%-%d min" % (round(grad[j][0]*100,1), round(grad[j][1]*100,1), tg[j]))
+                        for j in range(len(grad)):
+                            header.append("%.1f%% %.1f%% %.1f min" % (round(grad[j][0]*100,1), round(grad[j][1]*100,1), tg[j]))
                         self.tablemodel.setHeader(header)
                         self.tableView.model().layoutChanged.emit()
 
                     if self.firstcolobjname.isChecked():
                         row.append(v[0])
-                        for item in v[1:-1]:
-                            row.append(float(item))
+                        for j in range(1, len(v)):
+                            try:
+                                row.append(float(v[j]))
+                            except:
+                                row.append(v[j])
                     else:
                         row.append("Molecule %d" % (i+1))
                         for item in v:
-                            row.append(float(item))
+                            try:
+                                row.append(float(item))
+                            except:
+                                row.append(item)
                     self.tablemodel.addRow(row)
                     self.tableView.model().layoutChanged.emit()
                     i += 1
@@ -115,8 +122,8 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
                 trdata.append(list())
                 if self.firstcolobjname.isChecked():
                     molname.append(v[0])
-                    for item in v[1:-1]:
-                        trdata[-1].append(float(item))
+                    for j in range(1, len(v)):
+                        trdata[-1].append(float(v[j]))
                 else:
                     molname.append("Molecule %d" % (i+1))
                     for item in v:

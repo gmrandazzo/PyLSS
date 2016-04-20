@@ -121,7 +121,6 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                         rows.append(str(index.data().toPyObject()))
                         previous = index
                     columns.append(rows)
-                    print columns
 
                     # add rows and columns to clipboard
                     clipboard = ""
@@ -179,7 +178,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                 tg = self.datalst[self.current_lst_index].tg
                 header = ["Molecule"]
                 for j in range(len(tg)):
-                    header.append("%.1f%%-%.1f%%-%d min" % (round(grad[j][0]*100,1), round(grad[j][1]*100,1), tg[j]))
+                    header.append(str("%.1f%% %.1f%% %.1f min" % (round(grad[j][0]*100,1), round(grad[j][1]*100,1), tg[j])))
                 self.tablemodel.setHeader(header)
                 for i in range(len(trdata)):
                     row = [molname[i]]
@@ -253,7 +252,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.tablemodel.setHeader(header)
         self.tableView.model().layoutChanged.emit()
         if indx >= 0 and indx < len(self.modellst):
-            molname = self.modellst[indx].molname
+            molname = [name for name in self.modellst[indx].molname]
             lss = self.modellst[indx].lss
             flow_sofware = float(self.doubleSpinBox_1.value())
             init_B_soft = float(self.doubleSpinBox_2.value())/100.
@@ -280,99 +279,108 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
             A = 1.0
 
-            N = (c_lenght*10000.)/(2.3*c_particle)
-
+            N = (c_lenght*10000.)/(3.4*c_particle)
             trtab = []
             lssmol = LinearGenerator(None, None, None, t0_soft, float(self.modellst[indx].v_d), flow_sofware)
             i = 0
-            tr_tmp = []
+            trlst = []
             for row in lss:
                 lss_logkw = float(row[0])
                 lss_s = float(row[1])
                 b = (t0_soft*(final_B_soft-init_B_soft)*lss_s)/tg_soft
                 # See D. Guillaume et al / J. Chromatogr. A 1216(2009) 3232-3243
                 W = (4*t0_soft)/sqrt(N)* (1+ 1/(2.3*b))/4
-                trtab.append([lssmol.rtpred(lss_logkw, lss_s, tg_soft, init_B_soft, final_B_soft, t0_soft, td_soft), A, W])
-                tr_tmp.append([round(trtab[-1][0], 2), W, i])
+                tr = lssmol.rtpred(lss_logkw, lss_s, tg_soft, init_B_soft, final_B_soft, t0_soft, td_soft)
+                if tr < t0_soft:
+                    trtab.append([t0_soft, A, W])
+                else:
+                    trtab.append([tr, A, W])
+                trlst.append([round(trtab[-1][0], 2), W, molname[i]])
                 row = [molname[i], round(lss_logkw, 3), round(lss_s, 3), round(trtab[-1][0],2)]
                 self.tablemodel.addRow(row)
                 self.tableView.model().layoutChanged.emit()
                 i += 1
 
-            tr_tmp = sorted(tr_tmp, key=lambda x:x[0])
+            trlst = sorted(trlst, key=lambda x:x[0])
             # get min and max time
-            tr_min = tr_tmp[0][0]
-            tr_max = tr_tmp[-1][0]
-            # calculate resolution and critical couple
+            tr_min = tr_max = 0.
+            if len(trlst) > 0:
+                tr_min = trlst[0][0]
+                tr_max = trlst[-1][0]
+                # calculate resolution and critical couple
+                # get the peak width at base multiplying by 1.7
+                self.plainTextEdit.clear()
+                text = "Critical couples:\n"
+                self.plainTextEdit.appendPlainText(text)
 
-            width1 = tr_tmp[0][1]
-            width2 = tr_tmp[1][1]
-            tr1 = tr_tmp[0][0]
-            tr2 = tr_tmp[1][0]
-            small_rs = (2.*(tr2-tr1)) / (width1+width2)
-            mol_a = 0
-            mol_b = 1
-            for i in range(1, len(tr_tmp)):
-                width1 = tr_tmp[i][1]
-                width2 = tr_tmp[i-1][1]
-                tr1 = tr_tmp[i-1][0]
-                tr2 = tr_tmp[i][0]
-                tmp_rs = (2.*(tr2-tr1)) / (width1+width2)
-                if tmp_rs < small_rs:
-                    small_rs = tmp_rs
-                    mol_a = tr_tmp[i-1][2]
-                    mol_b = tr_tmp[i][2]
-                else:
-                    continue
+                crit_trtab = []
+                crit_molname = []
+                ncc = 0
+                for i in range(1, len(trlst)):
+                    width1 = trlst[i][1] * 1.7
+                    width2 = trlst[i-1][1] * 1.7
+                    tr1 = trlst[i-1][0]
+                    tr2 = trlst[i][0]
+                    tmp_rs = (2*(tr2-tr1)) / (width1+width2)
+                    if tmp_rs < 1.8:
+                        molname_a = trlst[i-1][2]
+                        molname_b = trlst[i][2]
+                        text =  "  - %s  %.2f min\n" % (molname_a, round(trlst[i-1][0], 2))
+                        text += "  - %s  %.2f min\n" % (molname_b, round(trlst[i][0], 2))
+                        text += "Rs: %.2f\n" % round(tmp_rs, 2)
+                        text += "#"*20
+                        text += "\n"
+                        self.plainTextEdit.appendPlainText(text)
+                        ncc += 1
+                        if molname_a not in crit_molname:
+                            # add to critical tr tab
+                            a_indx = molname.index(molname_a)
+                            crit_trtab.append(trtab.pop(a_indx))
+                            crit_molname.append(molname.pop(a_indx))
 
+                        if molname_b not in crit_molname:
+                            b_indx = molname.index(molname_b)
+                            crit_trtab.append(trtab.pop(b_indx))
+                            crit_molname.append(molname.pop(b_indx))
+                    else:
+                        continue
 
-            text = "Critical resolution: %f\n" % (small_rs)
-            text += "Molecules:\n"
-            text += "  - %s  %.2f min\n" % (molname[mol_a], round(trtab[mol_a][0], 2))
-            text += "  - %s  %.2f min\n" % (molname[mol_b], round(trtab[mol_b][0], 2))
-            self.plainTextEdit.document().setPlainText(text)
+                self.plainTextEdit.appendPlainText("Total critical couples: %d" % (ncc))
 
-            crit_trtab = []
-            if mol_a > mol_b:
-                crit_trtab.append(trtab.pop(mol_b))
-                crit_trtab.append(trtab.pop(mol_a-1))
-            else:
-                crit_trtab.append(trtab.pop(mol_a))
-                crit_trtab.append(trtab.pop(mol_b-1))
-            peaks = BuildChromatogram(trtab, tg_soft, 0.01)
-            peaks = zip(*peaks)
+                peaks = BuildChromatogram(trtab, tg_soft, 0.01)
+                peaks = zip(*peaks)
 
-            crit_peaks = BuildChromatogram(crit_trtab, tg_soft, 0.01)
-            crit_peaks = zip(*crit_peaks)
+                crit_peaks = BuildChromatogram(crit_trtab, tg_soft, 0.01)
+                crit_peaks = zip(*crit_peaks)
 
-            y = []
-            x = []
-            for i in range(len(peaks)):
-                x.append(peaks[i][0])
-                y.append(0.)
-                len(peaks[0])
-                for j in range(1, len(peaks[0])):
-                    y[-1] += peaks[i][j]
+                y = []
+                x = []
+                for i in range(len(peaks)):
+                    x.append(peaks[i][0])
+                    y.append(0.)
+                    len(peaks[0])
+                    for j in range(1, len(peaks[0])):
+                        y[-1] += peaks[i][j]
 
-            crit_y = []
-            crit_x = []
-            for i in range(len(crit_peaks)):
-                crit_x.append(crit_peaks[i][0])
-                crit_y.append(0.)
-                len(peaks[0])
-                for j in range(1, len(crit_peaks[0])):
-                    crit_y[-1] += crit_peaks[i][j]
-            ax = self.figure.add_subplot(111)
-            ax.hold(False)
-            ax.plot(x, y, "b", crit_x, crit_y, "r")
+                crit_y = []
+                crit_x = []
+                for i in range(len(crit_peaks)):
+                    crit_x.append(crit_peaks[i][0])
+                    crit_y.append(0.)
+                    len(peaks[0])
+                    for j in range(1, len(crit_peaks[0])):
+                        crit_y[-1] += crit_peaks[i][j]
+                ax = self.figure.add_subplot(111)
+                ax.hold(False)
+                ax.plot(x, y, "b", crit_x, crit_y, "r")
 
-            #ax.plot(x, y, '-', color='blue')
-            #ax.plot(crit_x, crit_y, '-', color='red')
-            plt.xlabel('Time')
-            plt.ylabel('Signal')
-            plt.xlim([tr_min-((tr_min*10.)/100.), tr_max+((tr_max*10.)/100.)])
-            self.canvas.draw()
-            #self.plotchromatogram()
+                #ax.plot(x, y, '-', color='blue')
+                #ax.plot(crit_x, crit_y, '-', color='red')
+                plt.xlabel('Time')
+                plt.ylabel('Signal')
+                plt.xlim([tr_min-((tr_min*10.)/100.), tr_max+((tr_max*10.)/100.)])
+                self.canvas.draw()
+                #self.plotchromatogram()
 
 def main():
     app = QtGui.QApplication(sys.argv)

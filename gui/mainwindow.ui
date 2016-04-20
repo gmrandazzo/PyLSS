@@ -14,7 +14,7 @@
    <string>PyLSS</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_7">
+   <layout class="QGridLayout" name="gridLayout_11">
     <item row="0" column="0" rowspan="3">
      <widget class="QGroupBox" name="settingBox">
       <property name="maximumSize">
@@ -73,8 +73,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>225</width>
-            <height>459</height>
+            <width>240</width>
+            <height>558</height>
            </rect>
           </property>
           <attribute name="label">
@@ -305,88 +305,72 @@
       </property>
       <property name="maximumSize">
        <size>
-        <width>16777215</width>
+        <width>292</width>
         <height>60</height>
        </size>
       </property>
       <property name="title">
        <string>Plot options</string>
       </property>
-      <widget class="QPushButton" name="zoomButton">
-       <property name="geometry">
-        <rect>
-         <x>35</x>
-         <y>27</y>
-         <width>90</width>
-         <height>32</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>90</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>90</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Zoom</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="panButton">
-       <property name="geometry">
-        <rect>
-         <x>153</x>
-         <y>27</y>
-         <width>90</width>
-         <height>32</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>90</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>90</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Pan</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="rescaleButton">
-       <property name="geometry">
-        <rect>
-         <x>271</x>
-         <y>27</y>
-         <width>90</width>
-         <height>32</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>90</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>90</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Rescale</string>
-       </property>
-      </widget>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="zoomButton">
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Zoom</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="panButton">
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Pan</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="rescaleButton">
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Rescale</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item row="0" column="2">
@@ -399,7 +383,7 @@
       </property>
       <property name="maximumSize">
        <size>
-        <width>240</width>
+        <width>9999999</width>
         <height>60</height>
        </size>
       </property>
