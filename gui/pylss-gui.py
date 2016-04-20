@@ -106,6 +106,25 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
         self.tablemodel = TableModel(self)
         self.tableView.setModel(self.tablemodel)
+        self.tableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tableView.customContextMenuRequested.connect(self.openTableMenu)
+
+    def openTableMenu(self, position):
+        """ context menu event """
+        menu = QtGui.QMenu(self)
+        exportAction = menu.addAction("Export table as CSV")
+        action = menu.exec_(self.tableView.viewport().mapToGlobal(position))
+
+        if action == exportAction:
+            fname = QtGui.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)");
+            #fname = QtGui.getSaveFileName.getOpenFileName(self, tr('Save File'), )
+            self.tablemodel.SaveTable(fname)
+        else:
+            return
+
+
+        return
+
 
     def keyPressEvent(self, e):
         if (e.modifiers() & QtCore.Qt.ControlModifier):

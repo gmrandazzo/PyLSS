@@ -7,8 +7,7 @@ and is distributed under LGPL version 3
 Geneve February 2015
 '''
 
-from PyQt4 import *
-from PyQt4 import *
+from PyQt4 import QtGui, QtCore
 
 def nsplit(s, delim=None):
     """ Split a string by a delimiter """
@@ -65,3 +64,14 @@ class TableModel(QtCore.QAbstractTableModel):
             else:
                 return None
         return None
+
+    def SaveTable(self, fname):
+        fo = open(fname, "w")
+        for i in range(len(self.header)-1):
+            fo.write("%s;" % (self.header[i]))
+        fo.write("%s\n" % (self.header[-1]))
+        for row in self.arraydata:
+            for i in range(len(row-1)):
+                fo.write("%s;" % (row[i]))
+            fo.write("%s\n" % (row[-1]))
+        fo.close()
