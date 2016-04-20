@@ -66,12 +66,16 @@ class TableModel(QtCore.QAbstractTableModel):
         return None
 
     def SaveTable(self, fname):
-        fo = open(fname, "w")
-        for i in range(len(self.header)-1):
-            fo.write("%s;" % (self.header[i]))
-        fo.write("%s\n" % (self.header[-1]))
-        for row in self.arraydata:
-            for i in range(len(row-1)):
-                fo.write("%s;" % (row[i]))
-            fo.write("%s\n" % (row[-1]))
-        fo.close()
+        if fname != None:
+            fo = open(fname, "w")
+            for i in range(len(self.header)-1):
+                fo.write("%s;" % (self.header[i]))
+            fo.write("%s\n" % (self.header[-1]))
+            for row in self.arraydata:
+                for i in range(len(row-1)):
+                    fo.write("%s;" % (row[i]))
+                fo.write("%s\n" % (row[-1]))
+            fo.close()
+            return
+        else:
+            return
