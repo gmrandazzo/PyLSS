@@ -8,7 +8,7 @@ if not path in sys.path:
     sys.path.insert(1, path)
 del path
 
-from pylss.lssengine import *
+from pylss.ssengine import *
 from pylss.optseparation import *
 
 def main():
@@ -59,7 +59,7 @@ def main():
             elif "Time zero:" in line:
                 t0 = str.split(line.strip(), ":")[-1].strip()
             else:
-                lssmol = LinearGenerator(c_length, c_diameter, c_porosity, t0,
+                lssmol = SSGenerator(c_length, c_diameter, c_porosity, t0,
                                       v_d, flow, init_b, final_b, tg1, tg2)
                 var = str.split(line.strip(), ";")
                 lss_logkw, lss_s = lssmol.getlssparameters(var[0], var[1])

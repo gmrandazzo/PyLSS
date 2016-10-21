@@ -6,6 +6,7 @@ Geneve September 2015
 
 '''
 
+
 import string
 from math import exp
 from pylab import plot, xlabel, ylabel, grid, show
@@ -19,6 +20,9 @@ def seq(start, stop, step=1):
 
 def square(x):
     return x*x
+
+def BuildSelectivityMap(model):
+    return None
 
 def BuildChromatogram(trtab, maxtime, delta_time):
     peaks = []

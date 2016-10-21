@@ -16,3 +16,5 @@ def drange(start, stop, step):
     while r < stop:
         yield r
         r += step
+    yield r
+    r += stop

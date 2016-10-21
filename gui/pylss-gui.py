@@ -13,6 +13,7 @@ import sys
 import Tkinter
 import FileDialog
 
+
 path = None
 try:
     path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -32,13 +33,14 @@ import matplotlib.backends.backend_tkagg
 import matplotlib.pyplot as plt
 
 
-from lssengine import *
+from ssengine import *
 from plotengine import BuildChromatogram
 
 import mainwindow as mw
 from importdialog import *
 from computelss import *
 from computebestgradient import *
+from plotselectivitymap import *
 from aboutdialog import *
 from utilities import *
 
@@ -75,6 +77,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.removeButton.clicked.connect(self.remove)
         self.actionCalcLSSParameter.triggered.connect(self.calculatelss)
         self.actionGetBestGradientConditions.triggered.connect(self.calculatebestgrad)
+        self.actionSelectivityMap.triggered.connect(self.pltselectivitymap)
         self.actionAbout.triggered.connect(self.about)
         self.actionQuit.triggered.connect(self.quit)
         self.listView.clicked.connect(self.viewmatrix)
@@ -100,9 +103,19 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.toolbar.hide()
 
         # set the layout
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(self.canvas)
-        self.plotterBox.setLayout(layout)
+        layout_chormatogram = QtGui.QVBoxLayout()
+        layout_chormatogram.addWidget(self.canvas)
+        self.plotterBox.setLayout(layout_chormatogram)
+
+        # Add selectivity map plot
+        #self.figure_smap = plt.figure()
+        #self.canvas_smap = FigureCanvas(self.figure_smap)
+        #self.toolbar_smap = NavigationToolbar(self.canvas_smap, self)
+        #self.toolbar_smap.hide()
+
+        #layout_smap = QtGui.QVBoxLayout()
+        #layout_smap.addWidget(self.canvas_smap)
+        #self.plotterBox_2.setLayout(layout_smap)
 
         self.tablemodel = TableModel(self)
         self.tableView.setModel(self.tablemodel)
@@ -233,7 +246,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             v_d = self.datalst[indx].vd
             flow = self.datalst[indx].flow
 
-            lssmol = LinearGenerator(None, None, None, t0, v_d, flow)
+            lssmol = SSGenerator(None, None, None, t0, v_d, flow)
 
             self.modellst.append(Model())
             self.modellst[-1].modname = modelname
@@ -262,6 +275,10 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         getbestgrad = ComputeBestGradient(self.modellst)
         getbestgrad.exec_()
 
+    def pltselectivitymap(self):
+        smap = PlotSelectivityMap(self.modellst)
+        smap.exec_()
+
     def gradientanalyser(self):
         indx = self.modelBox.currentIndex()
         del self.tablemodel.arraydata[:]
@@ -271,6 +288,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.tablemodel.setHeader(header)
         self.tableView.model().layoutChanged.emit()
         if indx >= 0 and indx < len(self.modellst):
+            #predict the retention time for each compound
             molname = [name for name in self.modellst[indx].molname]
             lss = self.modellst[indx].lss
             flow_sofware = float(self.doubleSpinBox_1.value())
@@ -300,7 +318,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
             N = (c_lenght*10000.)/(3.4*c_particle)
             trtab = []
-            lssmol = LinearGenerator(None, None, None, t0_soft, float(self.modellst[indx].v_d), flow_sofware)
+            lssmol = SSGenerator(None, None, None, t0_soft, float(self.modellst[indx].v_d), flow_sofware)
             i = 0
             trlst = []
             for row in lss:
@@ -308,7 +326,9 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                 lss_s = float(row[1])
                 b = (t0_soft*(final_B_soft-init_B_soft)*lss_s)/tg_soft
                 # See D. Guillaume et al / J. Chromatogr. A 1216(2009) 3232-3243
-                W = (4*t0_soft)/sqrt(N)* (1+ 1/(2.3*b))/4
+                #W = (4*t0_soft)/sqrt(N)* (1+ 1/(2.3*b))/4
+                # Modified version
+                W = (12*t0_soft)/sqrt(N)* (1+ 1/(2.3*b))
                 tr = lssmol.rtpred(lss_logkw, lss_s, tg_soft, init_B_soft, final_B_soft, t0_soft, td_soft)
                 if tr < t0_soft:
                     trtab.append([t0_soft, A, W])
@@ -320,6 +340,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                 self.tableView.model().layoutChanged.emit()
                 i += 1
 
+            # Calculate the critical resolution
             trlst = sorted(trlst, key=lambda x:x[0])
             # get min and max time
             tr_min = tr_max = 0.
@@ -366,6 +387,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
                 self.plainTextEdit.appendPlainText("Total critical couples: %d" % (ncc))
 
+                #Create a cromatogram
                 peaks = BuildChromatogram(trtab, tg_soft, 0.01)
                 peaks = zip(*peaks)
 
@@ -400,6 +422,9 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                 plt.xlim([tr_min-((tr_min*10.)/100.), tr_max+((tr_max*10.)/100.)])
                 self.canvas.draw()
                 #self.plotchromatogram()
+
+
+
 
 def main():
     app = QtGui.QApplication(sys.argv)

@@ -1,3 +1,11 @@
+# Personal excluded files
+confidential_works/
+pylss/generalssgen.py
+pylss/nlssengine.py
+pylss/intervallssengine.py
+pylss/nlssengine.py
+bin/nlssgen.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

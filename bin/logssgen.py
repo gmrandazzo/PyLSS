@@ -64,16 +64,16 @@ def main():
             elif "Plate Numbers" in line:
                 continue
             else:
-                lssmol = SSGenerator(c_length, c_diameter, c_porosity, t0, v_d, flow)
+                logssmol = SSGenerator(c_length, c_diameter, c_porosity, t0, v_d, flow)
                 var = str.split(line.strip(), ";")
                 tr = []
                 for item in var:
                     tr.append(float(item))
 
-                lss_logkw, lss_s = lssmol.getlssparameters(tr, tg, init_B, final_B)
+                lss_logkw, lss_s = logssmol.getlogssparameters(tr, tg, init_B, final_B)
                 com = ""
                 for i in range(len(tr)):
-                    trpred = lssmol.rtpred(lss_logkw, lss_s, tg[i], init_B[i], final_B[i], lssmol.t0, lssmol.td)
+                    trpred = logssmol.logrtpred(lss_logkw, lss_s, tg[i], init_B[i], final_B[i], logssmol.t0, logssmol.td)
                     com += str("%.2f\t%.2f\t" % (tr[i], trpred))
                 print com
                 del tr[:]

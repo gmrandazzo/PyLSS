@@ -1,0 +1,8 @@
+- Add Resolution Map for logss
+- Add Resolution Map for logss to GUI
+- Add Selectivity MAP for logarithmic gradient to GUI
+- Add Selectivity MAP for linear gradient
+- Add Selectivity MAP for linear gradient to GUI
+- Add Robustness calculation
+- Add peak width to import file
+- Write automatic elution window stretching algorithm

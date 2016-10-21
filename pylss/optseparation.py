@@ -12,8 +12,9 @@ automatically trough the L-BFGS-B method.
 
 from optimizer import simplex as fmin
 from gradientutils import *
-from math import sqrt, log10, fabs, isnan, isinf
+from math import sqrt, log10, log, fabs, isnan, isinf
 from miscalgoritms import *
+import numpy as np
 
 class OptSep(object):
     """Perform the optimization of a separation using the LSS parameters
@@ -66,7 +67,7 @@ class OptSep(object):
 
     Notes
     -----
-    See examples/plot_mdc_example.py for an example.
+    None.
 
     References
     ----------
@@ -95,6 +96,46 @@ class OptSep(object):
         self.c_particle = 1.7 #um
         self.tr_min = 1
         self.tr_max = 60
+
+
+    def getSelMapPlot(self, model, flow=0.3, g_start_min=0.00, g_start_max=1.0, g_stop_min=0.1, g_stop_max=1.0, time_grad_min=2, time_grad_max=60):
+        """ Plot the Selectivity function of the different parameters
+	    to optimize under gradient conditions
+        """
+        gcondlst = []
+        sellst = []
+        trlst = []
+        #d_init_b = (g_start_max - g_start_min)/20.
+        #d_final_b = (g_stop_max-g_stop_min)/20.
+        #print d_init_b, d_final_b
+        step = 0.05
+        #for init_b in drange(g_start_min, g_start_max, step):
+        for init_b in np.linspace(g_start_min, g_start_max, 20, endpoint=True):
+            #for final_b in drange(g_stop_min+init_b, float(g_stop_max), step):
+            for final_b in np.linspace(g_stop_min, g_stop_max, 20, endpoint=True):
+                for tg in drange(time_grad_min, time_grad_max,  2):
+                    lsscc = None
+                    lowest_alpha = None
+                    if model == "lss":
+                        lsscc, lowest_alpha = get_lss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
+                    else:#
+                        lsscc, lowest_alpha = get_logss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
+
+                    if lowest_alpha != None:
+                        #print init_b, final_b, tg, lowest_alpha
+                        gcondlst.append([init_b, final_b, tg, self.flow, lowest_alpha])
+                        # lsscc: first two column correspond to the object id, the last to the rs associated
+                        if lsscc != None and len(lsscc) > 0:
+                            totsel = 0.
+                            for i in range(len(lsscc)):
+                                totsel += lsscc[i][-1]
+                            avgrs = totsel/float(len(lsscc))
+                            sellst.append(avgrs)
+                        else:
+                            continue
+                    else:
+                        continue
+        return gcondlst, sellst, trlst
 
     def isocratic_iterfun(self, phi):
         """ Iterative function which minimize the rs.
@@ -269,3 +310,93 @@ class OptSep(object):
                         continue
 
         return gcondlst, rslst, trlst
+
+    def optloggradfun(self, grad):
+        init_b = grad[0]
+        final_b = grad[1]
+        tg = grad[2]
+        t0 = self.v_m/self.flow
+        td = self.v_d/self.flow
+        logssmol = SSGenerator(None, None, None, t0, self.v_d, self.flow)
+        if final_b > 1 or final_b < 0 or init_b > final_b or init_b < 0 or init_b > 1 or tg < 0 or tg > self.maxtg:
+            return 9999
+        else:
+            tr = []
+            for i in range(len(self.logkw_s_tab)):
+                logkw = self.logkw_s_tab[i][0]
+                s = self.logkw_s_tab[i][1]
+                try:
+                    tr.append(logssmol.logrtpred(logkw, s, tg, init_b, final_b, t0, td))
+                except:
+                    continue
+
+            if len(tr) == len(self.logkw_s_tab):
+                mintr = min(tr)
+                maxtr = max(tr)
+                lower_lim =  t0+(t0*0.3)
+                upper_lim = tg - (tg*0.1)
+                if maxtr > upper_lim or mintr < lower_lim:
+                    return 9999.
+                else:
+                    ss = 0.
+                    for i in range(len(tr)):
+                        for j in range(i, len(tr)):
+                            ss += square(tr[i]-tr[j])
+
+                    return 1/ss
+            else:
+                return 9999.
+
+    def getloggradientconditions(self, tr_min, tr_max):
+    	"""
+    	Optimize the logarithmic gradient conditions
+    	finding different value of flow rate,
+    	initial and final organic solvent and time gradient.
+    	The equation to be used are these and the equation for the resolution
+    	it is the same of the isocratic conditions.
+        """
+        self.maxtg = tr_max
+        self.tr_min = tr_min
+        self.tr_max = tr_max
+        best_ss = None
+        best_gcond = None
+
+        for init_b in drange(0.00, 1.0, 0.1):
+            for final_b in drange(init_b+0.1, 1.0, 0.1):
+                for tg in drange(1, self.maxtg, 1):
+                    gcond = [init_b, final_b, tg]
+                    tmp_bestgcond = fmin(self.optloggradfun, gcond, side=[0.05, 0.05, 1], tol=1e-10)
+                    tmp_ssmax = self.optloggradfun(tmp_bestgcond)
+                    if best_ss != None:
+                        if tmp_ssmax < best_ss:
+                            best_ss = tmp_ssmax
+                            best_gcond = tmp_bestgcond
+                        else:
+                            continue
+                    else:
+                        best_gcond = tmp_bestgcond
+                        best_ss = tmp_ssmax
+
+        """
+        self.maxtg = 15
+        gcond = [0.05, 1., 15]
+        best_gcond = fmin(self.optloggradfun, gcond, side=[0.05, 0.05, 1], tol=1e-10)
+        best_ss = self.optloggradfun(best_gcond)
+        """
+        init_b = best_gcond[0]
+        final_b = best_gcond[1]
+        tg = best_gcond[2]
+
+		# Function calculation
+        t0 = self.v_m/self.flow
+        td = self.v_d/self.flow
+        logssmol = SSGenerator(None, None, None, t0, self.v_d, self.flow)
+
+        tr = []
+        for i in range(len(self.logkw_s_tab)):
+            logkw = self.logkw_s_tab[i][0]
+            s = self.logkw_s_tab[i][1]
+            tr.append(logssmol.logrtpred(logkw, s, tg, init_b, final_b, t0, td))
+
+        # return the best condition, the retention times and the best rs average
+        return best_gcond, tr, 1/best_ss

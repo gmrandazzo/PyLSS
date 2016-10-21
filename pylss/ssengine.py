@@ -55,11 +55,11 @@ Chromatography.
 
 #from scipy.optimize import fmin
 from optimizer import simplex as fmin
-from math import sqrt, pi, log10, log, exp, fabs, isnan, isinf, erf
+from math import sqrt, pi, log, log10, log, exp, fabs, isnan, isinf, erf
 from miscalgoritms import *
 
-class LinearGenerator(object):
-    """Perform the generation of LSS parameters logKw and S
+class SSGenerator(object):
+    """Perform the generation of Linea/Logarithmic Solvent Strength parameters logKw and S
 
     Parameters
     ----------
@@ -145,6 +145,7 @@ class LinearGenerator(object):
 
 
     def rtpred(self, logkw, S, tg, init_B, final_B, t0, td):
+        """ FUNCTION TO PREDICT RETENTION TIMES UNDER LINEAR GRADIENT CONDITIONS """
         if logkw != None and S != None:
             DeltaFi = final_B - init_B
             b = (t0 * DeltaFi * S) / tg
@@ -178,7 +179,7 @@ class LinearGenerator(object):
         return rmsd
 
     def getlssparameters(self, tr, tg, init_B, final_B):
-        """ Return the logKw and S parameters """
+        """ Return the logKw and S parameters for linear gradient conditions """
         self.tr = tr
         self.tg = tg
         self.init_B = init_B
@@ -188,6 +189,40 @@ class LinearGenerator(object):
         self.lss_logkw, self.lss_s = fmin(self.iterfun, lssinit, side=[0.1, 0.1], tol=1e-10)
         return self.lss_logkw, self.lss_s
 
+    def logrtpred(self, logkw, S, tg, init_B, final_B, t0, td):
+        """ FUNCTION TO PREDICT RETENTION TIMES UNDER LOGARITHMIC  GRADIENT CONDITIONS """
+        if logkw != None and S != None:
+            try:
+                DeltaFi = final_B - init_B
+                a = (DeltaFi)/log(tg+1)
+                b = (S*a)
+                logk0 = logkw - S*(init_B)
+                k0 = exp(logk0)
+                tr_pred = (t0*k0*(b+1))**(1/(b+1)) - td -1
+                return tr_pred
+            except:
+                return 9999
+        else:
+            return 9999
+
+    def logiterfun(self, lss):
+        res = 0.
+        for i in range(len(self.tr)):
+            tr_pred = self.logrtpred(lss[0], lss[1], self.tg[i], self.init_B[i], self.final_B[i], self.t0, self.td)
+            res += square(self.tr[i]-tr_pred)
+        rmsd = sqrt(res)
+        return rmsd
+
+    def getlogssparameters(self, tr, tg, init_B, final_B):
+        """ Return the logKw and S parameters for logarithmic gradient conditions"""
+        self.tr = tr
+        self.tg = tg
+        self.init_B = init_B
+        self.final_B = final_B
+        lssinit = [0.1, 0.1]
+        #simplex optimization
+        self.lss_logkw, self.lss_s = fmin(self.logiterfun, lssinit, side=[0.1, 0.1], tol=1e-10)
+        return self.lss_logkw, self.lss_s
 
     def getlss_s(self):
         """ Return the S parameter """

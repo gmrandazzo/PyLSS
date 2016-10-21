@@ -1,5 +1,5 @@
 '''
-@package lssengine
+@package ssengine
 
 lsscoltransfer was writen by Giuseppe Marco Randazzo <gmrandazzo@gmail.com>
 Geneve Dec 2015

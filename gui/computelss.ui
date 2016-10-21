@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>410</width>
-    <height>123</height>
+    <width>307</width>
+    <height>173</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Select Data</string>
+        <string>Select data</string>
        </property>
       </widget>
      </item>
@@ -29,6 +29,31 @@
     </layout>
    </item>
    <item row="1" column="0" colspan="3">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Gradient mode type</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="gradientModeBox">
+       <item>
+        <property name="text">
+         <string>Linear time gradient</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Logarithmic time gradient</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" colspan="3">
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="1">
       <widget class="QLineEdit" name="lineEdit"/>
@@ -42,7 +67,7 @@
      </item>
     </layout>
    </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -55,7 +80,7 @@
      </property>
     </spacer>
    </item>
-   <item row="2" column="1">
+   <item row="3" column="1">
     <widget class="QPushButton" name="closeButton">
      <property name="maximumSize">
       <size>
@@ -68,7 +93,7 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
+   <item row="3" column="2">
     <widget class="QPushButton" name="okButton">
      <property name="maximumSize">
       <size>
@@ -82,14 +107,9 @@
     </widget>
    </item>
   </layout>
-  <zorder>layoutWidget</zorder>
   <zorder>okButton</zorder>
-  <zorder>layoutWidget_2</zorder>
   <zorder>horizontalSpacer</zorder>
   <zorder>closeButton</zorder>
-  <zorder>dataBox</zorder>
-  <zorder>label_4</zorder>
-  <zorder>label_7</zorder>
  </widget>
  <resources/>
  <connections/>

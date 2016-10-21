@@ -18,6 +18,7 @@ SFC
 from optimizer import simplex as fmin
 from math import sqrt, pi, log10, log, exp, fabs, isnan, isinf, cos, sin, asin
 from optseparation import drange
+from time import sleep
 
 def square(val):
     """ return the square of val"""
@@ -25,16 +26,19 @@ def square(val):
 
 class NLSS(object):
     """
-1) k = kw + S1*exp(-S2*fi)
+    To test:
+
+     Ca = C0 + DeltaFi/Tg *tR
+
+1) ln(k) = ln(kw) + 1/(S-Fi)
 
 where:
     kw: is the pure retention factor in water
-    S1: is the parameter one
-    S2: is the parameter two
+    S: is the parameter two
     Fi: %Organic solvent
 
 
-2) t = (b*kw*t0 + fi0) / b  - ln(-1 * (S1*exp(b*S2*kw*t0) - kw*exp(fi0*S2) - S1)/kw) / (b*S2) + tD
+2) t = ...
 
 where:
  b: the gradient slope (Fi_f - Fi_i / tG)
@@ -45,9 +49,8 @@ This equation is property of Giuseppe Marco Randazzo
 
 """
     def __init__(self, CLenght, CDiameter, CPorosity, t0, Vd, flow):
-        self.lss_logkw = None
-        self.lss_A = None
-        self.lss_B = None
+        self.logkw = None
+        self.S = None
 
         if CLenght != None and CDiameter != None and CPorosity != None:
             #Column Parameters
@@ -83,6 +86,7 @@ This equation is property of Giuseppe Marco Randazzo
           #print("t0 %f td %f DeltaFi %f" % (self.t0, self.td, self.DeltaFi))
 
     def simplelr(self, x, y):
+        """ Linear Regression between x and y """
         slope = 0.
         intercept = 0.
         x_med = sum(x)/float(len(x))
@@ -96,93 +100,46 @@ This equation is property of Giuseppe Marco Randazzo
         intercept = y_med - slope*x_med
         return slope, intercept
 
-    def iterfun(self, lss_param):
+    def iterfun(self, param):
         """ Iterative function to minimize the error in prediction
         lss_param[0] = A = s1
         lss_param[1] = B = s2
         lss_param[2] = C = logkw
         """
-        S1 = lss_param[0]
-        S2 = lss_param[1]
-        logkw = lss_param[2]
+        logkw = param[0]
+        S = param[1]
+        q = param[2]
 
         res = 0.
         for i in range(len(self.tr)):
-            tr_pred = self.rtpred4(S1, S2, logkw, self.tg[i], self.init_B[i], self.final_B[i], self.t0, self.td)
-            kpred = (tr_pred - self.td -self.t0)/self.t0
-            k = (self.tr[i] - self.td -self.t0)/self.t0
-            res += square(k-kpred)
+            tr_pred = self.rtpred(logkw, S, q, self.tg[i], self.init_B[i], self.final_B[i], self.t0, self.td)
+            res += square(self.tr[i]-tr_pred)
         rmsd = sqrt(res)
-
         return rmsd
 
-    def rtpred4(self, A, B, C, tg, init_B, final_B, t0, td):
-        """
-        k = kw + S/fi^2
-        """
-        kw = exp(C)
-        S1 = A
-        S2 = B
-        DeltaFi = final_B - init_B
-        b = DeltaFi/tg
-
-        try:
-            trpred = (sqrt(init_B*(4*b*S1*t0 + init_B**3)) * fabs(init_B**2*kw+S1))/(2*b*S1*init_B) - (init_B*(init_B**2*kw+S1))/(2*b*S1) + t0 + td
-            return trpred
-        except:
-            return 9999
-
-    def rtpred3(self, A, B, C, tg, init_B, final_B, t0, td):
-        """
-        logk = logkw + S1*log(fi)
-        """
-        kw = exp(C)
-        S1 = A
-        DeltaFi = final_B - init_B
-        b = DeltaFi/tg
-        tpred = ((init_B**(-1*S1)*(init_B-b*kw*t0*init_B**S1*(S1-1)))**(1/(1-S1)))/b - init_B/b
-        return tpred
-
-
-    def rtpred2(self, A, B, C, tg, init_B, final_B, t0, td):
-        """
-        logkw = logkw + S1/(S2-x)
-        """
-        try:
-            kw = exp(C)
-            S1 = A
-            S2 = B
-            DeltaFi = final_B - init_B
-            b = DeltaFi/tg
-            com = (init_B*S1 + square(S2))
-            n = exp(b*S1*kw*t0*exp(S1/S2)/square(S2))*com
-            d = b*S1
-            tpred = (n/d) - (com/d) + t0 + td
-            return tpred
-        except:
-            return 9999
-
-    def rtpred(self, A, B, C, tg, init_B, final_B, t0, td):
+    def rtpred(self, kw, S, c, tg, init_B, final_B, t0, td):
         """
         Analyitic solution from the integral which use the following relation:
-        k = kw + S1*exp(-S2*fi)
+        ln(k) = ln(kw) + ln(1/(S-Fi))
         """
+
         try:
-            kw = C
-            S1 = A
-            S2 = B
-            DeltaFi = float(final_B) - float(init_B)
-            b = DeltaFi/float(tg)
-            p = (b*kw*t0+init_B)/b
-            exp1a = exp(init_B*S2)
-            exp1b = exp(b*S2*kw*t0)
-            x = -1 * (S1*exp1b - kw*exp1a -S1)/kw
-            if x > 0:
-                return (p - log(x)/(b*S2) + t0 + td)
-            else:
+            b = (float(final_B) - float(init_B))/float(tg)
+            bd = b*td
+            bcw = b*(1-c)*kw
+            bdfs = -bd-init_B+S
+            mc = -1+c
+            omc = 1/mc
+            a = (((1/bdfs)**mc)/bcw) - t0
+            p = (bcw*a)**omc
+            if p != p:
                 return 9999
+            else:
+                #print "%f %f %f %f %f %f %f %f %f\n" % (kw, S, c, init_B, final_B, t0, td, tg, b)
+                return -1/b *((1+bd * p) + (init_B * p) - (S * p)) * p
         except:
             return 9999
+
 
     def getlssparameters(self, tr, tg, init_B, final_B):
         """ Return the logKw and S parameters """
@@ -192,12 +149,10 @@ This equation is property of Giuseppe Marco Randazzo
         self.final_B = final_B
 
         #fast static optimization
-        #lss_param_init =[0.5, 0.01, 0.01]
-        lss_param_init =[1., 1., 1.]
-        #lss_param_init = [4.012136916119, -3.280816332293, 102.010647704]
-        lss_param = fmin(self.iterfun, lss_param_init, side=[0.01, 0.01, 1], tol=1e-10, iterations=2000)
+        param_init =[1., 1., 1.]
+        best_param = fmin(self.iterfun, param_init, side=[1., 1., 1.], tol=1e-6, iterations=1000)
 
-        self.lss_A = lss_param[0]
-        self.lss_B = lss_param[1]
-        self.lss_logkw = lss_param[2]
-        return self.lss_logkw, self.lss_A, self.lss_B
+        self.logkw = best_param[0]
+        self.S = best_param[1]
+        c = best_param[1]
+        return self.logkw, self.S, c

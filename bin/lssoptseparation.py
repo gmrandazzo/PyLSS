@@ -8,7 +8,7 @@ if not path in sys.path:
     sys.path.insert(1, path)
 del path
 
-from pylss.lssengine import *
+from pylss.ssengine import *
 from pylss.optseparation import *
 
 def main():
@@ -64,7 +64,7 @@ def main():
             elif "Plate Numbers" in line:
                 continue
             else:
-                lssmol = LinearGenerator(c_length, c_diameter, c_porosity, t0, v_d, flow)
+                lssmol = SSGenerator(c_length, c_diameter, c_porosity, t0, v_d, flow)
                 var = str.split(line.strip(), ";")
                 tr = []
                 for item in var:

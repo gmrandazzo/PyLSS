@@ -11,10 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Compute best gradient conditions</string>
+   <string>Automatic elution windows stretching</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="3">
+   <item row="0" column="0" colspan="4">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="label_4">
@@ -28,7 +28,7 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0" colspan="3">
+   <item row="1" column="0" colspan="2">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QLabel" name="label">
@@ -86,7 +86,20 @@
      </item>
     </layout>
    </item>
-   <item row="2" column="0" colspan="3">
+   <item row="1" column="2" colspan="2">
+    <spacer name="horizontalSpacer_4">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>215</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0" colspan="4">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QPushButton" name="calculateButton">
@@ -116,39 +129,26 @@
      </item>
     </layout>
    </item>
-   <item row="3" column="0" colspan="3">
-    <widget class="QGroupBox" name="plotterBox">
-     <property name="minimumSize">
-      <size>
-       <width>551</width>
-       <height>311</height>
-      </size>
-     </property>
-     <property name="title">
-      <string>Optimization View</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item row="3" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
-      <widget class="QLabel" name="label_10">
+      <widget class="QLabel" name="label_20">
        <property name="text">
         <string>Best conditions:</string>
        </property>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
        <item>
-        <widget class="QLabel" name="label_15">
+        <widget class="QLabel" name="label_21">
          <property name="text">
           <string>Gradient Resolution</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_10">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -161,30 +161,30 @@
      </item>
     </layout>
    </item>
-   <item row="4" column="1" colspan="2">
-    <spacer name="horizontalSpacer_3">
+   <item row="3" column="1" colspan="3">
+    <spacer name="horizontalSpacer_5">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>647</width>
+       <width>368</width>
        <height>20</height>
       </size>
      </property>
     </spacer>
    </item>
-   <item row="5" column="0" colspan="3">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <item row="4" column="0" colspan="4">
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
-      <widget class="QLabel" name="label_11">
+      <widget class="QLabel" name="label_16">
        <property name="text">
         <string>Gradient Start:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
        <property name="readOnly">
         <bool>true</bool>
        </property>
@@ -194,14 +194,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_12">
+      <widget class="QLabel" name="label_17">
        <property name="text">
         <string>Gradient Stop:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
        <property name="readOnly">
         <bool>true</bool>
        </property>
@@ -211,14 +211,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_13">
+      <widget class="QLabel" name="label_18">
        <property name="text">
         <string>Time Gradient:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
        <property name="readOnly">
         <bool>true</bool>
        </property>
@@ -228,14 +228,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_14">
+      <widget class="QLabel" name="label_19">
        <property name="text">
         <string>Flow rate:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_9">
        <property name="readOnly">
         <bool>true</bool>
        </property>
@@ -246,7 +246,20 @@
      </item>
     </layout>
    </item>
-   <item row="6" column="0" colspan="2">
+   <item row="5" column="0" colspan="4">
+    <widget class="QGroupBox" name="plotterBox">
+     <property name="minimumSize">
+      <size>
+       <width>551</width>
+       <height>311</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Selectivity map</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -259,7 +272,7 @@
      </property>
     </spacer>
    </item>
-   <item row="6" column="2">
+   <item row="6" column="3">
     <widget class="QPushButton" name="closeButton">
      <property name="maximumSize">
       <size>
@@ -272,11 +285,28 @@
      </property>
     </widget>
    </item>
+   <item row="7" column="1" colspan="3">
+    <spacer name="horizontalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>368</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
   </layout>
   <zorder>closeButton</zorder>
   <zorder>horizontalSpacer</zorder>
   <zorder>plotterBox</zorder>
+  <zorder>layoutWidget</zorder>
   <zorder>horizontalSpacer_3</zorder>
+  <zorder>layoutWidget_2</zorder>
+  <zorder>horizontalSpacer_4</zorder>
+  <zorder>horizontalSpacer_5</zorder>
  </widget>
  <resources/>
  <connections/>
