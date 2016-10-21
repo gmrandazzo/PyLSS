@@ -137,6 +137,131 @@ class OptSep(object):
                         continue
         return gcondlst, sellst, trlst
 
+    def getAutomaticElutionWindowStretching(self, model, flow=0.3, g_start_min=0.00, g_start_max=1.0, g_stop_min=0.1, g_stop_max=1.0, time_grad_min=2, time_grad_max=60):
+        """ Calculate the automatic elution window stretching to optimise the separation
+        """
+        gcond = []
+        best_dindx = None
+        t0 = self.v_m *self.flow
+        td = self.v_d *self.flow
+        lssmol = SSGenerator(None, None, None, t0, self.v_d, self.flow)
+        print g_start_min, g_stop_min
+        for init_b in np.linspace(g_start_min, g_start_max, 20, endpoint=True):
+            for final_b in np.linspace(g_stop_min, g_stop_max, 20, endpoint=True):
+                for tg in drange(time_grad_min, time_grad_max,  2):
+                    trtab = []
+                    i = 0
+                    opt_spacing = (tg - (t0+1))/float(len(self.logkw_s_tab))
+                    for row in self.logkw_s_tab:
+                        lss_logkw = row[0]
+                        lss_s =  row[1]
+                        tr_tmp = None
+                        if model == "lss":
+                            tr_tmp = lssmol.rtpred(lss_logkw, lss_s, tg, init_b, final_b, t0, td)
+                        else:#
+                            tr_tmp = logssmol.logrtpred(lss_logkw, lss_s, tg, init_b, final_b, t0, td)
+
+                        if tr_tmp < t0 or isnan(tr_tmp) or tr_tmp == None:
+                            break # these condition are not ok for automatic elution window stretching calculations
+                        else:
+                            trtab.append([tr_tmp, i])
+                        i+=1
+
+                    if len(trtab) == len(self.logkw_s_tab):
+                        trtab = sorted(trtab, key=lambda x:x[0])
+                        dindx = 0.
+
+                        for i in range(1, len(trtab)):
+                            dindx += ((trtab[i][0]-trtab[i-1][0]) - opt_spacing)**2
+                        dindx = sqrt(dindx)
+
+                        #print dindx, init_b, final_b, tg
+                        if best_dindx == None:
+                            best_dindx = dindx
+                        else:
+                            if dindx < best_dindx:
+                                best_dindx = dindx
+                                gcond = [init_b, final_b, tg]
+                            else:
+                                continue
+
+        return gcond
+
+    def isocratic_iterfun(self, phi):
+        """ Iterative function which minimize the rs.
+        This function will take into account also the
+        peak enlargement function of the organic modifier utilized."""
+        if phi > 0:
+            tr = []
+            for row in self.logkw_s_tab:
+                logk = row[0] - (row[1]*phi)
+                k = pow(10, logk)
+                if k > self.kisomin and k < self.kisomax:
+                    t0 = self.v_m/self.flow
+                    tr_tmp = (k *t0) + t0
+                    tr.append(tr_tmp)
+                else:
+                    continue
+            if len(tr) == len(self.logkw_s_tab):
+                tr.sort()
+                rs = []
+                for i in range(1, len(tr)):
+                    width1 = sqrt((5.54*tr[i-1]*tr[i-1])/ self.plate)
+                    width2 = sqrt((5.54*tr[i]*tr[i]) / self.plate)
+                    rs.append((2.*(tr[i]-tr[i-1]))/(width1+width2))
+
+                # Search the critical couple
+                small_rs = max(rs)
+                for i in range(len(rs)):
+                    if rs[i] < small_rs and rs[i] > 0:
+                        small_rs = rs[i]
+                    else:
+                        continue
+                return 1/small_rs
+            else:
+                return 9999
+        else:
+            return 9999
+
+    def getSelMapPlot(self, model, flow=0.3, g_start_min=0.00, g_start_max=1.0, g_stop_min=0.1, g_stop_max=1.0, time_grad_min=2, time_grad_max=60):
+        """ Plot the Selectivity function of the different parameters
+	    to optimize under gradient conditions
+        """
+        gcondlst = []
+        sellst = []
+        trlst = []
+        #d_init_b = (g_start_max - g_start_min)/20.
+        #d_final_b = (g_stop_max-g_stop_min)/20.
+        #print d_init_b, d_final_b
+        step = 0.05
+        #for init_b in drange(g_start_min, g_start_max, step):
+        for init_b in np.linspace(g_start_min, g_start_max, 20, endpoint=True):
+            #for final_b in drange(g_stop_min+init_b, float(g_stop_max), step):
+            for final_b in np.linspace(g_stop_min, g_stop_max, 20, endpoint=True):
+                for tg in drange(time_grad_min, time_grad_max,  2):
+                    lsscc = None
+                    lowest_alpha = None
+                    if model == "lss":
+                        lsscc, lowest_alpha = get_lss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
+                    else:#
+                        lsscc, lowest_alpha = get_logss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
+
+                    if lowest_alpha != None:
+                        #print init_b, final_b, tg, lowest_alpha
+                        gcondlst.append([init_b, final_b, tg, self.flow, lowest_alpha])
+                        # lsscc: first two column correspond to the object id, the last to the rs associated
+                        if lsscc != None and len(lsscc) > 0:
+                            totsel = 0.
+                            for i in range(len(lsscc)):
+                                totsel += lsscc[i][-1]
+                            avgrs = totsel/float(len(lsscc))
+                            sellst.append(avgrs)
+                        else:
+                            continue
+                    else:
+                        continue
+        return gcondlst, sellst, trlst
+
     def isocratic_iterfun(self, phi):
         """ Iterative function which minimize the rs.
         This function will take into account also the

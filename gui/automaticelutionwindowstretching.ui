@@ -1,19 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ComputeBestGradient</class>
- <widget class="QDialog" name="ComputeBestGradient">
+ <class>AutomaticElutionWindowStretching</class>
+ <widget class="QDialog" name="AutomaticElutionWindowStretching">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>576</width>
-    <height>697</height>
+    <width>658</width>
+    <height>251</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Automatic elution windows stretching</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="0" colspan="4">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="calculateButton">
+       <property name="maximumSize">
+        <size>
+         <width>110</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Calculate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>796</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>932</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
    <item row="0" column="0" colspan="4">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -86,6 +129,19 @@
      </item>
     </layout>
    </item>
+   <item row="4" column="3">
+    <widget class="QPushButton" name="closeButton">
+     <property name="maximumSize">
+      <size>
+       <width>110</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Close</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="2" colspan="2">
     <spacer name="horizontalSpacer_4">
      <property name="orientation">
@@ -99,82 +155,7 @@
      </property>
     </spacer>
    </item>
-   <item row="2" column="0" colspan="4">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QPushButton" name="calculateButton">
-       <property name="maximumSize">
-        <size>
-         <width>110</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Calculate</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>796</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item row="3" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout_4">
-     <item>
-      <widget class="QLabel" name="label_20">
-       <property name="text">
-        <string>Best conditions:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
-       <item>
-        <widget class="QLabel" name="label_21">
-         <property name="text">
-          <string>Gradient Resolution</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDoubleSpinBox" name="doubleSpinBox_10">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="buttonSymbols">
-          <enum>QAbstractSpinBox::NoButtons</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </item>
-   <item row="3" column="1" colspan="3">
-    <spacer name="horizontalSpacer_5">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>368</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="4" column="0" colspan="4">
+   <item row="3" column="0" colspan="4">
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
       <widget class="QLabel" name="label_16">
@@ -227,86 +208,12 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QLabel" name="label_19">
-       <property name="text">
-        <string>Flow rate:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_9">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="buttonSymbols">
-        <enum>QAbstractSpinBox::NoButtons</enum>
-       </property>
-      </widget>
-     </item>
     </layout>
-   </item>
-   <item row="5" column="0" colspan="4">
-    <widget class="QGroupBox" name="plotterBox">
-     <property name="minimumSize">
-      <size>
-       <width>551</width>
-       <height>311</height>
-      </size>
-     </property>
-     <property name="title">
-      <string>Selectivity map</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0" colspan="3">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>932</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="6" column="3">
-    <widget class="QPushButton" name="closeButton">
-     <property name="maximumSize">
-      <size>
-       <width>110</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Close</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="1" colspan="3">
-    <spacer name="horizontalSpacer_3">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>368</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
   <zorder>closeButton</zorder>
   <zorder>horizontalSpacer</zorder>
-  <zorder>plotterBox</zorder>
-  <zorder>layoutWidget</zorder>
-  <zorder>horizontalSpacer_3</zorder>
-  <zorder>layoutWidget_2</zorder>
   <zorder>horizontalSpacer_4</zorder>
-  <zorder>horizontalSpacer_5</zorder>
  </widget>
  <resources/>
  <connections/>

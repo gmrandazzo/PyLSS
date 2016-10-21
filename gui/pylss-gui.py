@@ -39,7 +39,7 @@ from plotengine import BuildChromatogram
 import mainwindow as mw
 from importdialog import *
 from computelss import *
-from computebestgradient import *
+from automaticelutionwindowstretching import *
 from plotselectivitymap import *
 from aboutdialog import *
 from utilities import *
@@ -76,7 +76,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.addButton.clicked.connect(self.add)
         self.removeButton.clicked.connect(self.remove)
         self.actionCalcLSSParameter.triggered.connect(self.calculatelss)
-        self.actionGetBestGradientConditions.triggered.connect(self.calculatebestgrad)
+        self.actionAutomaticElutionWindowStretching.triggered.connect(self.calcautelwindowstretch)
         self.actionSelectivityMap.triggered.connect(self.pltselectivitymap)
         self.actionAbout.triggered.connect(self.about)
         self.actionQuit.triggered.connect(self.quit)
@@ -271,9 +271,9 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             if len(self.modellst) == 1:
                 self.gradientanalyser()
 
-    def calculatebestgrad(self):
-        getbestgrad = ComputeBestGradient(self.modellst)
-        getbestgrad.exec_()
+    def calcautelwindowstretch(self):
+        aws = AutomaticElutionWindowStretching(self.modellst)
+        aws.exec_()
 
     def pltselectivitymap(self):
         smap = PlotSelectivityMap(self.modellst)

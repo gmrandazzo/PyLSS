@@ -464,7 +464,7 @@ Molecules:
     </property>
     <addaction name="actionCalcLSSParameter"/>
     <addaction name="separator"/>
-    <addaction name="actionGetBestGradientConditions"/>
+    <addaction name="actionAutomaticElutionWindowStretching"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -492,9 +492,9 @@ Molecules:
     <string>Calculate LSS parameter</string>
    </property>
   </action>
-  <action name="actionGetBestGradientConditions">
+  <action name="actionAutomaticElutionWindowStretching">
    <property name="text">
-    <string>Get best gradient conditions</string>
+    <string>Automatic elution window stretching</string>
    </property>
   </action>
   <action name="actionGetBestIsocraticConditions">

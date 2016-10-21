@@ -33,7 +33,7 @@ class PlotSelectivityMap(QtGui.QDialog, Ui_PlotSelectivityMap):
         self.figure, self.axes = plt.subplots(nrows=3, ncols=1)
         self.canvas = FigureCanvas(self.figure)
         self.toolbar = NavigationToolbar(self.canvas, self)
-        self.toolbar.hide()
+        #self.toolbar.hide()
         # set the layout
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.canvas)
