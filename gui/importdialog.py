@@ -59,6 +59,14 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
                 v = str.split(v, " ")
                 tg.append(float(v[0]))
                 grad.append([float(v[1])/100., float(v[2])/100.])
+            elif "column length" in line.lower():
+                continue
+            elif "column diameter" in line.lower():
+                continue
+            elif "column particle" in line.lower():
+                continue
+            elif "temperature" in line.lower():
+                continue
             else:
                 v = nsplit(line.strip(), self.splitlineby.currentText())
                 row = []
@@ -102,6 +110,9 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
         molname = []
         grad = []
         tg = []
+        c_length = 15
+        c_diameter = 2.1
+        c_particle = 1.7
         f = open(self.lineEdit.text())
         self.tablemodel.clean()
         i = 0
@@ -117,6 +128,14 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
                 v = str.split(v, " ")
                 tg.append(float(v[0]))
                 grad.append([float(v[1])/100., float(v[2])/100.])
+            elif "column length" in line.lower():
+                c_length = float(str.split(line.strip(), ":")[-1].strip())
+            elif "column diameter" in line.lower():
+                c_diameter = float(str.split(line.strip(), ":")[-1].strip())
+            elif "column particle" in line.lower():
+                c_particle = float(str.split(line.strip(), ":")[-1].strip())
+            elif "temperature" in line.lower():
+                continue
             else:
                 v = nsplit(line.strip(), self.splitlineby.currentText())
                 trdata.append(list())
@@ -133,4 +152,4 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
 
         return [self.lineEdit_2.text(), molname, trdata, grad, tg,
                 self.dwelVolSpinBox.value(), self.t0SpinBox.value(),
-                self.flowrateSpinBox.value()]
+                self.flowrateSpinBox.value(), c_length, c_diameter, c_particle]

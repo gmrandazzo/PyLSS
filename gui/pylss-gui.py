@@ -40,12 +40,12 @@ import mainwindow as mw
 from importdialog import *
 from computelss import *
 from automaticelutionwindowstretching import *
-from plotselectivitymap import *
+from plotmaps import *
 from aboutdialog import *
 from utilities import *
 
 class Data(object):
-    def __init__(self, name, molname, trdata, grad, tg, vd, t0, flow):
+    def __init__(self, name, molname, trdata, grad, tg, vd, t0, flow, c_length, c_diameter, c_particle):
         self.name = name
         self.molname = molname
         self.trdata = trdata
@@ -54,6 +54,9 @@ class Data(object):
         self.t0 = t0
         self.vd = vd
         self.flow = flow
+        self.c_length = c_length
+        self.c_diameter = c_diameter
+        self.c_particle = c_particle
 
 class Model(object):
     def __init__(self):
@@ -63,6 +66,9 @@ class Model(object):
         self.v_d = 0
         self.flow = 0
         self.lss = []
+        self.c_length = 15
+        self.c_particle = 1.7
+        self.c_diameter = 2.10
 
 class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -78,6 +84,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.actionCalcLSSParameter.triggered.connect(self.calculatelss)
         self.actionAutomaticElutionWindowStretching.triggered.connect(self.calcautelwindowstretch)
         self.actionSelectivityMap.triggered.connect(self.pltselectivitymap)
+        self.actionResolutionMap.triggered.connect(self.pltresolutionmap)
         self.actionAbout.triggered.connect(self.about)
         self.actionQuit.triggered.connect(self.quit)
         self.listView.clicked.connect(self.viewmatrix)
@@ -121,6 +128,10 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.tableView.setModel(self.tablemodel)
         self.tableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tableView.customContextMenuRequested.connect(self.openTableMenu)
+
+        # constant parameters
+        self.crit_resolution = 1.8
+        self.crit_alpha = 1.1
 
     def openTableMenu(self, position):
         """ context menu event """
@@ -187,8 +198,8 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
     def add(self):
         idialog = ImportDialog()
         if idialog.exec_() == 1:
-            [name, molname, trdata, grad, tg, td, t0, flow] = idialog.getdata()
-            self.datalst.append(Data(name, molname, trdata, grad, tg, td, t0, flow))
+            [name, molname, trdata, grad, tg, td, t0, flow, c_length, c_diameter, c_particle] = idialog.getdata()
+            self.datalst.append(Data(name, molname, trdata, grad, tg, td, t0, flow, c_length, c_diameter, c_particle))
             self.lstdatamodel.appendRow(QtGui.QStandardItem(name))
 
     def remove(self):
@@ -252,6 +263,9 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             self.modellst[-1].modname = modelname
             self.modellst[-1].molname = self.datalst[indx].molname
             self.modellst[-1].flow = self.datalst[indx].flow
+            self.modellst[-1].c_length = self.datalst[indx].c_length
+            self.modellst[-1].c_diameter = self.datalst[indx].c_diameter
+            self.modellst[-1].c_particle = self.datalst[indx].c_particle
             self.modelBox.addItem(modelname)
 
             tg = self.datalst[indx].tg
@@ -276,8 +290,12 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         aws.exec_()
 
     def pltselectivitymap(self):
-        smap = PlotSelectivityMap(self.modellst)
+        smap = PlotMaps(self.modellst, "sel")
         smap.exec_()
+
+    def pltresolutionmap(self):
+        rsmap = PlotMaps(self.modellst, "res")
+        rsmap.exec_()
 
     def gradientanalyser(self):
         indx = self.modelBox.currentIndex()
@@ -296,7 +314,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             final_B_soft = float(self.doubleSpinBox_3.value())/100.
             tg_soft = float(self.doubleSpinBox_4.value())
 
-            c_lenght = self.ColumnLenghtSpinBox.value()
+            c_length = self.ColumnLenghtSpinBox.value()
             c_diameter = self.CulumnDiameterSpinBox.value()
             c_particle = self.ColumnPorositySpinBox.value()
 
@@ -306,7 +324,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             v_m = None
             v_d = float(self.doubleSpinBox_5.value())
 
-            #if c_lenght > 0 and c_diameter > 0 and c_porosity > 0:
+            #if c_length > 0 and c_diameter > 0 and c_porosity > 0:
             #    v_m = ((square(self.c_diameter)*self.c_length*pi*self.c_porosity)/4.)/1000.
             #else:
             v_m = self.modellst[indx].v_m
@@ -316,7 +334,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
             A = 1.0
 
-            N = (c_lenght*10000.)/(3.4*c_particle)
+            N = (c_length*10000.)/(3.4*c_particle)
             trtab = []
             lssmol = SSGenerator(None, None, None, t0_soft, float(self.modellst[indx].v_d), flow_sofware)
             i = 0
@@ -325,10 +343,13 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                 lss_logkw = float(row[0])
                 lss_s = float(row[1])
                 b = (t0_soft*(final_B_soft-init_B_soft)*lss_s)/tg_soft
-                # See D. Guillaume et al / J. Chromatogr. A 1216(2009) 3232-3243
-                #W = (4*t0_soft)/sqrt(N)* (1+ 1/(2.3*b))/4
-                # Modified version
-                W = (12*t0_soft)/sqrt(N)* (1+ 1/(2.3*b))
+                # Snynder and Dolan peak width version adding the peak compression G
+                # p = 2.3*b*k0/(k0+1)
+                # G = ((1+p+(p**2/3))/(1+p)**2)**(1/2.)
+                k0 = lss_logkw-(lss_s*init_B_soft)
+                p = (2.3*b*k0)/(k0+1)
+                G = ((1+p+(p**2/3))/(1+p)**2)**(1/2.)
+                W = 4*N**(-1/2.)*G*t0_soft*(1+(1/(2.3*b)))
                 tr = lssmol.rtpred(lss_logkw, lss_s, tg_soft, init_B_soft, final_B_soft, t0_soft, td_soft)
                 if tr < t0_soft:
                     trtab.append([t0_soft, A, W])
@@ -362,7 +383,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                     tr1 = trlst[i-1][0]
                     tr2 = trlst[i][0]
                     tmp_rs = (2*(tr2-tr1)) / (width1+width2)
-                    if tmp_rs < 1.8:
+                    if tmp_rs < self.crit_resolution:
                         molname_a = trlst[i-1][2]
                         molname_b = trlst[i][2]
                         text =  "  - %s  %.2f min\n" % (molname_a, round(trlst[i-1][0], 2))

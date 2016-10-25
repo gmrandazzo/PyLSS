@@ -223,44 +223,36 @@ class OptSep(object):
         else:
             return 9999
 
-    def getSelMapPlot(self, model, flow=0.3, g_start_min=0.00, g_start_max=1.0, g_stop_min=0.1, g_stop_max=1.0, time_grad_min=2, time_grad_max=60):
-        """ Plot the Selectivity function of the different parameters
+    def getResMapPlot(self, model, flow=0.3, g_start_min=0.00, g_start_max=1.0, g_stop_min=0.1, g_stop_max=1.0, time_grad_min=2, time_grad_max=60):
+        """ Plot the Resolution function of the different parameters
 	    to optimize under gradient conditions
         """
         gcondlst = []
-        sellst = []
+        reslst = []
         trlst = []
-        #d_init_b = (g_start_max - g_start_min)/20.
-        #d_final_b = (g_stop_max-g_stop_min)/20.
-        #print d_init_b, d_final_b
         step = 0.05
-        #for init_b in drange(g_start_min, g_start_max, step):
         for init_b in np.linspace(g_start_min, g_start_max, 20, endpoint=True):
-            #for final_b in drange(g_stop_min+init_b, float(g_stop_max), step):
             for final_b in np.linspace(g_stop_min, g_stop_max, 20, endpoint=True):
                 for tg in drange(time_grad_min, time_grad_max,  2):
                     lsscc = None
                     lowest_alpha = None
                     if model == "lss":
-                        lsscc, lowest_alpha = get_lss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
+                        lsscc, lowestrs = get_lss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=1.8)
                     else:#
-                        lsscc, lowest_alpha = get_logss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
+                        lsscc, lowestrs = get_logss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=1.8)
 
-                    if lowest_alpha != None:
-                        #print init_b, final_b, tg, lowest_alpha
-                        gcondlst.append([init_b, final_b, tg, self.flow, lowest_alpha])
-                        # lsscc: first two column correspond to the object id, the last to the rs associated
-                        if lsscc != None and len(lsscc) > 0:
-                            totsel = 0.
-                            for i in range(len(lsscc)):
-                                totsel += lsscc[i][-1]
-                            avgrs = totsel/float(len(lsscc))
-                            sellst.append(avgrs)
-                        else:
-                            continue
+
+                    if lsscc != None and len(lsscc) > 0:
+                        totres = 0.
+                        for i in range(len(lsscc)):
+                            totres += lsscc[i][-1]
+                        avgrs = totres/float(len(lsscc))
+                        reslst.append(avgrs)
+                        gcondlst.append([init_b, final_b, tg, self.flow, lowestrs])
+
                     else:
                         continue
-        return gcondlst, sellst, trlst
+        return gcondlst, reslst, trlst
 
     def isocratic_iterfun(self, phi):
         """ Iterative function which minimize the rs.
@@ -350,16 +342,18 @@ class OptSep(object):
         init_b = grad[0]
         final_b = grad[1]
         tg = grad[2]
-        if final_b > 1 or final_b < 0 or init_b < 0 or init_b > 1 or tg < 0 or tg > self.maxtg:
+        if final_b > 1 or final_b < 0 or init_b < 0 or init_b > 1 or tg < 0 or tg > self.maxtg or fabs(init_b-0.01) < 1e-1 or fabs(final_b-0.01) < 1e-1:
             return 9999
         else:
-            lsscc = get_lss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=2.0)
+            #lsscc, lowestrs = get_lss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=2.0)
+            lsscc, lowestsel = get_lss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, 1.2)
             # lsscc: first two column correspond to the object id, the last to the rs associated
-            if lsscc != None:
-                totrs = 0.
-                for i in range(len(lsscc)):
-                    totrs += lsscc[i][-1]
-                return float(len(lsscc))/totrs
+
+            if lowestsel != None:
+                if lowestsel != 0:
+                    return 1/lowestsel
+                else:
+                    return 9999
             else:
                 return 9999
 
@@ -375,11 +369,11 @@ class OptSep(object):
         self.tr_max = tr_max
         best_rsmax = None
         best_gcond = None
-        for init_b in drange(0.00, 1.0, 0.1):
-            for final_b in drange(init_b+0.1, 1.0, 0.1):
-                for tg in drange(1, self.maxtg, 9):
+        for init_b in drange(0.0, 0.2, 0.05):
+            for final_b in drange(0.7, 1.0, 0.05):
+                for tg in drange(self.tr_min, self.tr_max, 2.):
                     gcond = [init_b, final_b, tg]
-                    tmp_bestgcond = fmin(self.optgradfun, gcond, side=[0.05, 0.05, 1], tol=1e-10)
+                    tmp_bestgcond = fmin(self.optgradfun, gcond, side=[0.05, 0.05, 1], tol=1e-2)
                     tmp_rsmax = self.optgradfun(tmp_bestgcond)
                     if best_rsmax != None:
                         if tmp_rsmax < best_rsmax:
@@ -422,7 +416,7 @@ class OptSep(object):
         for init_b in drange(g_start_min, g_start_max, 0.05):
             for final_b in drange(g_stop_min+init_b, g_stop_max, 0.05):
                 for tg in drange(time_grad_min, time_grad_max,  1):
-                    lsscc = get_lss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=2.0)
+                    lsscc, lowestrs = get_lss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=2.0)
                     # lsscc: first two column correspond to the object id, the last to the rs associated
                     if lsscc != None:
                         totrs = 0.

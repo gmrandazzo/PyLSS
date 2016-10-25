@@ -247,6 +247,8 @@ class Ui_MainWindow(object):
         self.actionExport_LSS_Parameter.setObjectName(_fromUtf8("actionExport_LSS_Parameter"))
         self.actionSelectivityMap = QtGui.QAction(MainWindow)
         self.actionSelectivityMap.setObjectName(_fromUtf8("actionSelectivityMap"))
+        self.actionResolutionMap = QtGui.QAction(MainWindow)
+        self.actionResolutionMap.setObjectName(_fromUtf8("actionResolutionMap"))
         self.menuFile.addAction(self.actionQuit)
         self.menuCalculation.addAction(self.actionCalcLSSParameter)
         self.menuCalculation.addSeparator()
@@ -256,6 +258,7 @@ class Ui_MainWindow(object):
         self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.actionAbout)
         self.menuPlot_2.addAction(self.actionSelectivityMap)
+        self.menuPlot_2.addAction(self.actionResolutionMap)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuCalculation.menuAction())
         self.menubar.addAction(self.menuPlot_2.menuAction())
@@ -309,4 +312,5 @@ class Ui_MainWindow(object):
         self.actionDocumentation.setText(_translate("MainWindow", "Documentation", None))
         self.actionExport_LSS_Parameter.setText(_translate("MainWindow", "Export LSS Parameter", None))
         self.actionSelectivityMap.setText(_translate("MainWindow", "Selectivity Map", None))
+        self.actionResolutionMap.setText(_translate("MainWindow", "Resolution Map", None))
 

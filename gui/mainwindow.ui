@@ -480,6 +480,7 @@ Molecules:
      <string>Plot</string>
     </property>
     <addaction name="actionSelectivityMap"/>
+    <addaction name="actionResolutionMap"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuCalculation"/>
@@ -540,6 +541,11 @@ Molecules:
   <action name="actionSelectivityMap">
    <property name="text">
     <string>Selectivity Map</string>
+   </property>
+  </action>
+  <action name="actionResolutionMap">
+   <property name="text">
+    <string>Resolution Map</string>
    </property>
   </action>
  </widget>

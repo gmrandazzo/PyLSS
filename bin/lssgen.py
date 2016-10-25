@@ -41,7 +41,7 @@ def main():
         final_B = []
         tg = []
         for line in fi:
-            if "Column Lenght" in line:
+            if "Column Length" in line:
                 c_length = str.split(line.strip(), ":")[-1].strip()
             elif "Column Diamter" in line:
                 c_diameter = str.split(line.strip(), ":")[-1].strip()
@@ -64,20 +64,23 @@ def main():
             elif "Plate Numbers" in line:
                 continue
             else:
-                lssmol = SSGenerator(c_length, c_diameter, c_porosity, t0, v_d, flow)
                 var = str.split(line.strip(), ";")
-                tr = []
-                for item in var:
-                    tr.append(float(item))
+                if len(var) == len(tg):
+                    lssmol = SSGenerator(c_length, c_diameter, c_porosity, t0, v_d, flow)
+                    tr = []
+                    for item in var:
+                        tr.append(float(item))
 
-                lss_logkw, lss_s = lssmol.getlssparameters(tr, tg, init_B, final_B)
-                com = ""
-                for i in range(len(tr)):
-                    trpred = lssmol.rtpred(lss_logkw, lss_s, tg[i], init_B[i], final_B[i], lssmol.t0, lssmol.td)
-                    com += str("%.2f\t%.2f\t" % (tr[i], trpred))
-                print com
-                del tr[:]
-                fo.write("%.10f\t%.10f\n" % (float(lss_logkw), float(lss_s)))
+                    lss_logkw, lss_s = lssmol.getlssparameters(tr, tg, init_B, final_B)
+                    com = ""
+                    for i in range(len(tr)):
+                        trpred = lssmol.rtpred(lss_logkw, lss_s, tg[i], init_B[i], final_B[i], lssmol.t0, lssmol.td)
+                        com += str("%.2f\t%.2f\t" % (tr[i], trpred))
+                    print com
+                    del tr[:]
+                    fo.write("%.10f\t%.10f\n" % (float(lss_logkw), float(lss_s)))
+                else:
+                    continue
 
         fi.close()
         fo.close()
