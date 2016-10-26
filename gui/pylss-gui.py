@@ -334,7 +334,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
             A = 1.0
 
-            N = (c_length*10000.)/(3.4*c_particle)
+            #N = (c_length*10000.)/(3.4*c_particle)
             trtab = []
             lssmol = SSGenerator(None, None, None, t0_soft, float(self.modellst[indx].v_d), flow_sofware)
             i = 0
@@ -342,14 +342,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
             for row in lss:
                 lss_logkw = float(row[0])
                 lss_s = float(row[1])
-                b = (t0_soft*(final_B_soft-init_B_soft)*lss_s)/tg_soft
-                # Snynder and Dolan peak width version adding the peak compression G
-                # p = 2.3*b*k0/(k0+1)
-                # G = ((1+p+(p**2/3))/(1+p)**2)**(1/2.)
-                k0 = lss_logkw-(lss_s*init_B_soft)
-                p = (2.3*b*k0)/(k0+1)
-                G = ((1+p+(p**2/3))/(1+p)**2)**(1/2.)
-                W = 4*N**(-1/2.)*G*t0_soft*(1+(1/(2.3*b)))
+                W = get_lss_peak_width(c_length, c_particle, lss_logkw, lss_s, init_B_soft, final_B_soft, tg_soft, flow_sofware, self.modellst[indx].v_m, self.modellst[indx].v_d, None)
                 tr = lssmol.rtpred(lss_logkw, lss_s, tg_soft, init_B_soft, final_B_soft, t0_soft, td_soft)
                 if tr < t0_soft:
                     trtab.append([t0_soft, A, W])
