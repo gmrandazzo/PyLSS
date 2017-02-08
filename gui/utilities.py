@@ -7,18 +7,33 @@ and is distributed under LGPL version 3
 Geneve February 2015
 '''
 
-from PyQt4 import QtGui, QtCore
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 def nsplit(s, delim=None):
     """ Split a string by a delimiter """
     return [x.strip() for x in s.split(delim) if x]
 
-class TableModel(QtCore.QAbstractTableModel):
+class TableModel(QAbstractTableModel):
     """ Class to visualize array in a QTableView """
+    refreshTable = pyqtSignal()
+
     def __init__(self, parent=None, *args):
-        QtCore.QAbstractTableModel.__init__(self, parent, *args)
+        QAbstractTableModel.__init__(self, parent, *args)
         self.arraydata = []
         self.header = []
+        self.timer = self.startTimer(300)
+
+    def timerEvent(self, e):
+        if self.timer == e.timerId():
+            self.refreshTable.emit()
+        else:
+            super(TableModel, self).timerEvent(e)
+
+    def refreshTableSlot(self):
+        self.beginResetModel.emit()
+        self.endResetModel.emit()
 
     def clean(self):
         del self.arraydata[:]
@@ -27,19 +42,25 @@ class TableModel(QtCore.QAbstractTableModel):
         self.header = header
 
     def addRow(self, row):
+        self.beginResetModel()
         self.arraydata.append(list())
         for item in row:
             self.arraydata[-1].append(item)
+        self.endResetModel()
 
     def delRowAt(self, indx):
+        self.beginResetModel()
         if indx < len(self.arraydata):
             del self.arraydata[indx]
+        self.endResetModel()
 
     def delColAt(self, indx):
+        self.beginResetModel()
         if len(self.arraydata) > 0:
             if indx < len(self.arraydata[0]):
                 for i in range(len(self.arraydata)):
                     del self.arraydata[i][indx]
+        self.endResetModel()
 
     def rowCount(self, parent):
         return len(self.arraydata)
@@ -52,13 +73,13 @@ class TableModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role):
         if not index.isValid():
-            return QtCore.QVariant()
-        elif role != QtCore.Qt.DisplayRole:
-            return QtCore.QVariant()
-        return QtCore.QVariant(self.arraydata[index.row()][index.column()])
+            return QVariant()
+        elif role != Qt.DisplayRole:
+            return QVariant()
+        return QVariant(self.arraydata[index.row()][index.column()])
 
     def headerData(self, col, orientation, role):
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             if col < len(self.header):
                 return self.header[col]
             else:

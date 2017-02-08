@@ -1,0 +1,9 @@
+Time zero: 0.832
+Dwell Volume: 0.100
+Flow Rate: 0.5
+Time Gradient 1: 15 5 95
+Time Gradient 2: 60 5 05
+5.41;14.31
+5.55;14.64
+5.62;14.5
+5.62;14.5

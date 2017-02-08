@@ -142,27 +142,29 @@ class SSGenerator(object):
 
         self.td = self.v_d/self.flow
 
-
-
     def rtpred(self, logkw, S, tg, init_B, final_B, t0, td):
         """ FUNCTION TO PREDICT RETENTION TIMES UNDER LINEAR GRADIENT CONDITIONS """
         if logkw != None and S != None:
             DeltaFi = final_B - init_B
             b = (t0 * DeltaFi * S) / tg
+            #b = (DeltaFi * S) / tg
             if b > 0:
                 """
-                less powerfull in some cases due to the log10 approximation...
+                Snyder & Dolan Resolution
                 """
                 logk0 = logkw - S*(init_B)
                 k0 = pow(10, logk0)
-                tr_pred = ((t0/b) * log10(2.3*k0*b))+ t0 + td
+                tr_pred = ((t0/b) * log10(2.3*k0*b+1))+ t0 + td
+
 
                 """
-                better powerfull
-                lnk0 = logkw - S*(self.init_B)
+                personal resolution. Better and powerfull!!
+
+                lnk0 = logkw - S*(init_B)
                 k0 = exp(lnk0)
-                    tr1_pred = log(b1*k0*self.t0+1)/b1 + self.t0 + self.td
-                tr2_pred = log(b2*k0*self.t0+1)/b2 + self.t0 + self.td
+                #iso = (td+tiso)/(t0*k0) #We thake into account an initial isocratic step.
+                # add (t0 - iso)
+                tr_pred = log(b*k0*(t0)+1)/b + t0 + td
                 """
                 return tr_pred
             else:

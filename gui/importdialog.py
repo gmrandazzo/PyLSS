@@ -7,17 +7,17 @@ and is distributed under LGPL version 3
 Geneve February 2015
 '''
 
-from PyQt4 import *
-from PyQt4 import *
+from PyQt5 import *
+from PyQt5 import *
 import sys
 
 from gui_importdialog import Ui_ImportDialog
 from os.path import isfile, basename
 from utilities import *
 
-class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
+class ImportDialog(QtWidgets.QDialog, Ui_ImportDialog):
     def __init__(self,parent=None):
-        QtGui.QDialog.__init__(self,parent)
+        QtWidgets.QDialog.__init__(self,parent)
         self.setupUi(self)
         self.tablemodel = TableModel(self)
         self.tableView.setModel(self.tablemodel)
@@ -29,7 +29,7 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
         self.firstcolobjname.stateChanged.connect(self.preview)
 
     def open_(self):
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file')
+        fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')
         if fname and isfile(fname):
             self.lineEdit.setText(fname)
             self.lineEdit_2.setText(str.split(basename(str(fname)), ".")[0])
@@ -77,7 +77,7 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
                         for j in range(len(grad)):
                             header.append("%.1f%% %.1f%% %.1f min" % (round(grad[j][0]*100,1), round(grad[j][1]*100,1), tg[j]))
                         self.tablemodel.setHeader(header)
-                        self.tableView.model().layoutChanged.emit()
+                        #self.tableView.model().layoutChanged.emit()
 
                     if self.firstcolobjname.isChecked():
                         row.append(v[0])
@@ -94,15 +94,20 @@ class ImportDialog(QtGui.QDialog, Ui_ImportDialog):
                             except:
                                 row.append(item)
                     self.tablemodel.addRow(row)
-                    self.tableView.model().layoutChanged.emit()
+                    #self.tableView.model().layoutAboutToBeChanged.emit()
+                    #self.tableView.model().layoutChanged.emit()
+                    #self.tableView.model().layoutChanged.emit()
                     i += 1
                 else:
                     row.append("...")
                     for j in range(len(v)):
                         row.append("...")
                     self.tablemodel.addRow(row)
-                    self.tableView.model().layoutChanged.emit()
+                    #self.tableView.model().layoutAboutToBeChanged.emit()
+                    #self.tableView.model().layoutChanged.emit()
+                    #self.tableView.model().layoutChanged.emit()
                     break
+
         f.close()
 
     def getdata(self):

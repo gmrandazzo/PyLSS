@@ -3,6 +3,10 @@
 import os
 import sys
 
+import matplotlib.pyplot as plt
+import scipy.interpolate
+
+
 path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if not path in sys.path:
     sys.path.insert(1, path)
@@ -174,7 +178,7 @@ def main():
                             mS = (logkw_s_tab_t2[q][1]-logkw_s_tab_t1[i][1]) / (t2-t1)
                             qS = (t2*logkw_s_tab_t1[q][1] - t1*logkw_s_tab_t2[q][1]) / (t2-t1)
                             lssparam.append([(mlogk*t[m] +qlogk), (mS*t[m] +qS)])
-                        lstcc, lowest_alpha = get_lss_gradient_critical_selectivity(5, 1.8, init_b[i], final_b[j], tg[k], flow, t0*flow, v_d, lssparam , crit_alpha=1.01)
+                        lstcc, lowest_alpha = get_lss_gradient_critical_selectivity(5, 1.8, init_b[i], final_b[j], tg[k], flow, t0*flow, v_d, lssparam , crit_alpha=0.9)
 
                         if lowest_alpha == None:
                             fo.write("Experiment%d;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f\n" % (p, r[i],r[j],r[k],r[m],r[i]*r[j],r[i]*r[k],r[i]*r[m],r[j]*r[k],r[j]*r[m],r[k]*r[m],r[i]**2,r[j]**2,r[k]**2,r[m]**2,0.))
@@ -183,8 +187,9 @@ def main():
                         p+=1
         fo.close()
 
-"""
+
         for t in drange(t1, t2+1, 5):
+            print "Temperature %f" % (t)
             temps.append(t)
             logkw_s_tab = []
             for i in range(len(logkw_s_tab_t1)):
@@ -195,6 +200,78 @@ def main():
                 logkw_s_tab.append([(mlogk*t +qlogk), (mS*t +qS)])
             opt = OptSep(float(t0)*float(flow), v_d, flow, logkw_s_tab)
             opt.plate = float(N)
+
+            [gcondlst, sellst, trlst] = opt.getSelMapPlot("lss", float(flow), g_start_min=0.00, g_start_max=0.10, g_stop_min=0.70, g_stop_max=1.0, time_grad_min=5, time_grad_max=12)
+            #getSelMapPlot("lss", flow=0.3, g_start_min=1.00, g_start_max=0.1, g_stop_min=0.7, g_stop_max=1.0, time_grad_min=4, time_grad_max=12)
+            x = []
+            y_alpha = []
+            y_final_b = []
+            y_tg = []
+            z = []
+            for i in range(len(gcondlst)):
+                #gcondlst.append([init_b, final_b, tg, self.flow, lowest_alpha])
+                x.append(float(gcondlst[i][0])*100)
+                y_alpha.append(float((gcondlst[i][1]-gcondlst[i][0])/log(gcondlst[i][2]+1))) # alpha
+                y_final_b.append(float(gcondlst[i][1])*100) # final b
+                y_tg.append(float(gcondlst[i][2])) # tg
+                z.append(float(gcondlst[i][-1]))
+
+            x = np.asarray(x)
+            y_alpha = np.asarray(y_alpha)
+            y_final_b = np.asarray(y_final_b)
+            y_tg = np.asarray(y_tg)
+            z = np.asarray(z)
+
+            # Set up a regular grid of interpolation points
+            npoints = 1000
+            xi, yi_alpha = np.linspace(x.min(), x.max(), npoints), np.linspace(y_alpha.min(), y_alpha.max(), npoints)
+            xi, yi_alpha = np.meshgrid(xi, yi_alpha)
+
+            xi, yi_final_b = np.linspace(x.min(), x.max(), npoints), np.linspace(y_final_b.min(), y_final_b.max(), npoints)
+            xi, yi_final_b = np.meshgrid(xi, yi_final_b)
+
+            xi, yi_tg = np.linspace(x.min(), x.max(), npoints), np.linspace(y_tg.min(), y_tg.max(), npoints)
+            xi, yi_tg = np.meshgrid(xi, yi_tg)
+
+            # Interpolate
+            #rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
+            #zi = rbf(xi, yi)
+
+            zi_alpha = scipy.interpolate.griddata((x, y_alpha), z, (xi, yi_alpha), method='linear')
+            zi_final_b = scipy.interpolate.griddata((x, y_final_b), z, (xi, yi_final_b), method='linear')
+            zi_tg = scipy.interpolate.griddata((x, y_tg), z, (xi, yi_tg), method='linear')
+
+
+            #f, axarr = plt.subplots(3, sharex=True)
+            fig, axes = plt.subplots(nrows=3, ncols=1)
+
+            im = axes.flat[0].imshow(zi_alpha, vmin=z.min(), vmax=z.max(), origin='lower',
+                      extent=[x.min(), x.max(), y_alpha.min(), y_alpha.max()], aspect='auto')
+            axes.flat[0].set_xlabel('Initial B (%)')
+            axes.flat[0].set_ylabel('Gradient steepness')
+
+            im = axes.flat[1].imshow(zi_final_b, vmin=z.min(), vmax=z.max(), origin='lower',
+                      extent=[x.min(), x.max(), y_final_b.min(), y_final_b.max()],  aspect='auto')
+
+            axes.flat[1].set_xlabel('Initial B (%)')
+            axes.flat[1].set_ylabel('Final B (%)')
+
+            im = axes.flat[2].imshow(zi_tg, vmin=z.min(), vmax=z.max(), origin='lower',
+                      extent=[x.min(), x.max(), y_tg.min(), y_tg.max()], aspect='auto')
+
+            axes.flat[2].set_xlabel('Initial B (%)')
+            axes.flat[2].set_ylabel('Time gradient (min)')
+
+            fig.colorbar(im, ax=axes.ravel().tolist())
+
+            #plt.imshow(zi, vmin=z.min(), vmax=z.max(), origin='lower',
+            #          extent=[x.min(), x.max(), y.min(), y.max()], cmap=plt.get_cmap("bwr"), aspect='auto')
+            #plt.scatter(x, y, c=z)
+            #plt.colorbar()
+
+            plt.show()
+
+            """
             [gcond, tr, Rs] = opt.getgradientconditions(5,15)
             Rslst.append(Rs)
             gcondlst.append(gcond)
@@ -205,7 +282,7 @@ def main():
         print "init B: %f\nfinal B: %f\nTime Gradient:%f\n" % (gcond[0], gcond[1], gcond[2])
         for time in tr:
             print "%.2f" % (time)
-"""
+            """
             #[gconds, rs, trs] = opt.getplotgradientconditions()
             #indxlst  = []
             #for i in range(len(rs)):

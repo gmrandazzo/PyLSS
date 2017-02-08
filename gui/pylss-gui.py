@@ -25,10 +25,10 @@ if not path in sys.path:
 del path
 
 
-from PyQt4 import QtGui
+from PyQt5 import *
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.backends.backend_tkagg
 import matplotlib.pyplot as plt
 
@@ -70,7 +70,7 @@ class Model(object):
         self.c_particle = 1.7
         self.c_diameter = 2.10
 
-class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
+class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
@@ -110,7 +110,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         self.toolbar.hide()
 
         # set the layout
-        layout_chormatogram = QtGui.QVBoxLayout()
+        layout_chormatogram = QtWidgets.QVBoxLayout()
         layout_chormatogram.addWidget(self.canvas)
         self.plotterBox.setLayout(layout_chormatogram)
 
@@ -120,7 +120,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         #self.toolbar_smap = NavigationToolbar(self.canvas_smap, self)
         #self.toolbar_smap.hide()
 
-        #layout_smap = QtGui.QVBoxLayout()
+        #layout_smap = QtWidgets.QVBoxLayout()
         #layout_smap.addWidget(self.canvas_smap)
         #self.plotterBox_2.setLayout(layout_smap)
 
@@ -135,13 +135,12 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
     def openTableMenu(self, position):
         """ context menu event """
-        menu = QtGui.QMenu(self)
+        menu = QtWidgets.QMenu(self)
         exportAction = menu.addAction("Export table as CSV")
         action = menu.exec_(self.tableView.viewport().mapToGlobal(position))
 
         if action == exportAction:
-            fname = QtGui.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)");
-            #fname = QtGui.getSaveFileName.getOpenFileName(self, tr('Save File'), )
+            fname, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)");
             self.tablemodel.SaveTable(fname)
         else:
             return
@@ -177,7 +176,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                         clipboard += '\n'
 
                     # copy to the system clipboard
-                    sys_clip = QtGui.QApplication.clipboard()
+                    sys_clip = QtWidgets.QApplication.clipboard()
                     sys_clip.setText(clipboard)
 
     def home(self):
@@ -191,7 +190,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         ''' plot some random stuff '''
         data = [random.random() for i in range(25)]
         ax = self.figure.add_subplot(111)
-        ax.hold(False)
+        ax.clear()
         ax.plot(data, '*-')
         self.canvas.draw()
 
@@ -228,7 +227,6 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                     for j in range(len(trdata[i])):
                         row.append(round(trdata[i][j], 2))
                     self.tablemodel.addRow(row)
-                self.tableView.model().layoutChanged.emit()
         else:
             del self.tablemodel.arraydata[:]
             del self.tablemodel.header[:]
@@ -241,7 +239,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
         adialog.exec_()
 
     def quit(self):
-        QtGui.QApplication.quit()
+        QtWidgets.QApplication.quit()
 
     def calculatelss(self):
         items = []
@@ -426,7 +424,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
                     for j in range(1, len(crit_peaks[0])):
                         crit_y[-1] += crit_peaks[i][j]
                 ax = self.figure.add_subplot(111)
-                ax.hold(False)
+                ax.clear()
                 ax.plot(x, y, "b", crit_x, crit_y, "r")
 
                 #ax.plot(x, y, '-', color='blue')
@@ -441,7 +439,7 @@ class MainWindow(QtGui.QMainWindow, mw.Ui_MainWindow):
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     form = MainWindow()
     form.show()
     app.exec_()

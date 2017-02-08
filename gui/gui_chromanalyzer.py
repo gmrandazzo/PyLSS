@@ -1,0 +1,93 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'chromanalyzer.ui'
+#
+# Created by: PyQt5 UI code generator 5.7.1
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+class Ui_ChromAnalyzer(object):
+    def setupUi(self, ChromAnalyzer):
+        ChromAnalyzer.setObjectName("ChromAnalyzer")
+        ChromAnalyzer.resize(904, 560)
+        self.gridLayout_2 = QtWidgets.QGridLayout(ChromAnalyzer)
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.splitter = QtWidgets.QSplitter(ChromAnalyzer)
+        self.splitter.setOrientation(QtCore.Qt.Horizontal)
+        self.splitter.setObjectName("splitter")
+        self.openChromButton = QtWidgets.QPushButton(self.splitter)
+        self.openChromButton.setMaximumSize(QtCore.QSize(180, 32))
+        self.openChromButton.setObjectName("openChromButton")
+        self.lineEdit = QtWidgets.QLineEdit(self.splitter)
+        self.lineEdit.setObjectName("lineEdit")
+        self.gridLayout_2.addWidget(self.splitter, 0, 0, 1, 6)
+        self.splitter_2 = QtWidgets.QSplitter(ChromAnalyzer)
+        self.splitter_2.setOrientation(QtCore.Qt.Horizontal)
+        self.splitter_2.setObjectName("splitter_2")
+        self.label = QtWidgets.QLabel(self.splitter_2)
+        self.label.setObjectName("label")
+        self.peakthreshold = QtWidgets.QDoubleSpinBox(self.splitter_2)
+        self.peakthreshold.setMaximumSize(QtCore.QSize(67, 24))
+        self.peakthreshold.setDecimals(3)
+        self.peakthreshold.setMinimum(0.001)
+        self.peakthreshold.setSingleStep(0.01)
+        self.peakthreshold.setProperty("value", 0.2)
+        self.peakthreshold.setObjectName("peakthreshold")
+        self.gridLayout_2.addWidget(self.splitter_2, 1, 0, 1, 2)
+        self.splitter_3 = QtWidgets.QSplitter(ChromAnalyzer)
+        self.splitter_3.setOrientation(QtCore.Qt.Horizontal)
+        self.splitter_3.setObjectName("splitter_3")
+        self.label_2 = QtWidgets.QLabel(self.splitter_3)
+        self.label_2.setObjectName("label_2")
+        self.windowsize = QtWidgets.QSpinBox(self.splitter_3)
+        self.windowsize.setMinimum(3)
+        self.windowsize.setMaximum(9999999)
+        self.windowsize.setProperty("value", 5)
+        self.windowsize.setObjectName("windowsize")
+        self.gridLayout_2.addWidget(self.splitter_3, 1, 2, 1, 1)
+        spacerItem = QtWidgets.QSpacerItem(380, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout_2.addItem(spacerItem, 1, 3, 1, 3)
+        self.analyzeButton = QtWidgets.QPushButton(ChromAnalyzer)
+        self.analyzeButton.setMaximumSize(QtCore.QSize(130, 32))
+        self.analyzeButton.setObjectName("analyzeButton")
+        self.gridLayout_2.addWidget(self.analyzeButton, 2, 0, 1, 1)
+        spacerItem1 = QtWidgets.QSpacerItem(509, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout_2.addItem(spacerItem1, 2, 1, 1, 5)
+        self.tableBox = QtWidgets.QGroupBox(ChromAnalyzer)
+        self.tableBox.setObjectName("tableBox")
+        self.gridLayout = QtWidgets.QGridLayout(self.tableBox)
+        self.gridLayout.setObjectName("gridLayout")
+        self.tableView = QtWidgets.QTableView(self.tableBox)
+        self.tableView.setObjectName("tableView")
+        self.gridLayout.addWidget(self.tableView, 0, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.tableBox, 3, 0, 1, 3)
+        self.plotterBox = QtWidgets.QGroupBox(ChromAnalyzer)
+        self.plotterBox.setMinimumSize(QtCore.QSize(481, 371))
+        self.plotterBox.setObjectName("plotterBox")
+        self.gridLayout_2.addWidget(self.plotterBox, 3, 3, 1, 3)
+        spacerItem2 = QtWidgets.QSpacerItem(376, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout_2.addItem(spacerItem2, 4, 0, 1, 4)
+        self.aboutButton = QtWidgets.QPushButton(ChromAnalyzer)
+        self.aboutButton.setObjectName("aboutButton")
+        self.gridLayout_2.addWidget(self.aboutButton, 4, 4, 1, 1)
+        self.quitButton = QtWidgets.QPushButton(ChromAnalyzer)
+        self.quitButton.setObjectName("quitButton")
+        self.gridLayout_2.addWidget(self.quitButton, 4, 5, 1, 1)
+
+        self.retranslateUi(ChromAnalyzer)
+        QtCore.QMetaObject.connectSlotsByName(ChromAnalyzer)
+
+    def retranslateUi(self, ChromAnalyzer):
+        _translate = QtCore.QCoreApplication.translate
+        ChromAnalyzer.setWindowTitle(_translate("ChromAnalyzer", "ChromAnalyzer"))
+        self.openChromButton.setText(_translate("ChromAnalyzer", "Open Chromatogram"))
+        self.label.setText(_translate("ChromAnalyzer", "Peak threshold"))
+        self.label_2.setText(_translate("ChromAnalyzer", "Window size"))
+        self.analyzeButton.setText(_translate("ChromAnalyzer", "Analyze"))
+        self.tableBox.setTitle(_translate("ChromAnalyzer", "Peak results"))
+        self.plotterBox.setTitle(_translate("ChromAnalyzer", "Chromatogram viewer"))
+        self.aboutButton.setText(_translate("ChromAnalyzer", "About"))
+        self.quitButton.setText(_translate("ChromAnalyzer", "Quit"))
+

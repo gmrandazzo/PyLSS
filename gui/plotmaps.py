@@ -7,16 +7,16 @@ and is distributed under LGPL version 3
 Geneve October 2016
 '''
 
-from PyQt4 import *
-from PyQt4 import *
+from PyQt5 import *
+from PyQt5 import *
 import sys
 
 from gui_plotmaps import Ui_PlotMaps
 
 from optseparation import *
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.pyplot as plt
@@ -24,9 +24,9 @@ import numpy as np
 import scipy.interpolate
 import random
 
-class PlotMaps(QtGui.QDialog, Ui_PlotMaps):
+class PlotMaps(QtWidgets.QDialog, Ui_PlotMaps):
     def __init__(self, modellst, type="sel", parent=None):
-        QtGui.QDialog.__init__(self,parent)
+        QtWidgets.QDialog.__init__(self,parent)
         self.setupUi(self)
 
         # Create the plot
@@ -36,7 +36,7 @@ class PlotMaps(QtGui.QDialog, Ui_PlotMaps):
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.toolbar.hide()
         # set the layout
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.canvas)
         self.plotterBox.setLayout(layout)
         self.closeButton.clicked.connect(self.close_)
