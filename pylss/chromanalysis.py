@@ -110,10 +110,14 @@ class ChromAnalysis(object):
         stdev = sqrt(stdev/float(n-1))
 
         # detect the peaks
+        pnlst = []
         for i in range(len(a)):
-            if a[i] > 0 and (a[i] - mean) > (self.h*stdev):
+            #if a[i] > 0 and (a[i] - mean) > (self.h*stdev):
+            if a[i] > 0 and a[i] > (mean+ self.h*stdev):
+                pnlst.append(i)
                 peaks.append([self.time[i+self.k], self.signal[i+self.k]])
             else:
+                pnlst.append(i)
                 peaks.append([self.time[i+self.k], 0.])
 
         return peaks
@@ -153,22 +157,31 @@ class ChromAnalysis(object):
                     continue
             peak = sorted(peak,key=lambda l:l[0])
 
-    def peaksplit(self, peaks):
+    def peaksplit(self, signal):
         """ Method to split the peaks identified by getPeask() """
-        #TODO: remove adjacet peaks within window size k
         peaklst = []
-        p = []
-        for i in range(len(peaks)):
-            if peaks[i][-1] > 0:
-                p.append(peaks[i])
+        p = [] # peak
+        #pnlst = []
+        #pn = [] # number in peak
+        for i in range(len(signal)):
+            if signal[i][-1] > 0:
+                p.append(signal[i])
+                #pn.append(i)
             else:
                 if len(p) > 0:
+                #    pnlst.append([])
                     peaklst.append([])
                     for row in p:
                         peaklst[-1].append(row)
+                #    for row in pn:
+                #        pnlst[-1].append(row)
                     del p[:]
+                #    del pn[:]
                 else:
                     continue
+
+        #TODO: Remove adjacet peaks within window size < k
+
         return peaklst
 
     def Mu1CentralMoment(self, time_, signal_):
