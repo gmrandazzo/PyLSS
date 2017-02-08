@@ -9,6 +9,15 @@ chromanalysis will analyse a chromatogram to convert this into descriptors.
 Actually it contains some algorithms such as:
 
 - Peak detection algorithm accordin the Peak-Valley Segmentation Algorithm
+  [1] Reference: Eamonn J. Keogh, Selina Chu, David Hart, and Michael J. Pazzani.
+  An online algorithm for segmenting time series.
+  In Proceedings of the 2001 IEEE International Conference on Data Mining,
+  ICDM ’01, pages 289–296, Washington, DC, USA, 2001. IEEE Computer Society.
+
+  [2] Z. M. Nopiah, M. I. Khairir, S. Abdullah, and C. K. E. Nizwan.
+  Peak-valley segmentation algorithm for fatigue time series data.
+  WSEAS Trans. Math., 7:698–707, December 2008.
+
 - Central moments calculation to describe the band broadeing (Band variance: u1, u2)
 - Integration of the peak
 
@@ -76,7 +85,9 @@ class ChromAnalysis(object):
         return (left + right) / 2.
 
     def getPeaks(self):
-        """ Method to find peaks in chromatograms """
+        """ Method to find peaks in chromatograms
+        The algorithm implemented is the Peak-Valley algorithm
+        """
         peaks = []
         #default values
         #h = 1
