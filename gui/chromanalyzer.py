@@ -129,7 +129,7 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
             self.tablemodel.clean()
 
             #set table header
-            header = ["Peak", "Peak points", "time min", "time max", "Mu1", "Mu2"]
+            header = ["Peak", "Peak points", "time min", "time max", "Mu1", "Mu2", "Area"]
             self.tablemodel.setHeader(header)
 
             #clean prevoius plot
@@ -158,7 +158,7 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
             peaks = chrom.getPeaks()
             peaklst = chrom.peaksplit(peaks)
 
-
+            pn = 1
             for i in range(len(peaklst)):
                 time_ = []
                 signal_ = []
@@ -176,7 +176,9 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
                     u1 = chrom.Mu1CentralMoment(time_, signal_)
                     u2 = chrom.Mu2CentralMoment(time_, signal_, u1)
 
-                    self.tablemodel.addRow([i+1, len(time_), min(time_), max(time_), u1, u2])
+                    area = chrom.integrate(signal_, 3)
+                    self.tablemodel.addRow([pn, len(time_), min(time_), max(time_), u1, u2, area])
+                    pn += 1
 
             #self.ax.grid(True, zorder=5)
             plt.xlabel('Time')
