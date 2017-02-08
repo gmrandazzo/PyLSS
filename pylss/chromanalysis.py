@@ -118,6 +118,41 @@ class ChromAnalysis(object):
 
         return peaks
 
+    def addLeftNpoints(self, peak, npnt=5):
+        if npnt == 0:
+            return
+        else:
+            tmin = peak[0][0]
+            for i in range(len(self.signal)):
+                if fabs(self.time[i]-tmin) < 1e-6:
+                    npnt_ = npnt
+                    if i-npnt_ < 0:
+                        while i - npnt < 0:
+                            npnt_ -= 1
+                    for j in range(i-npnt_, i):
+                        peak.insert(0, [self.time[j], self.signal[j]])
+                else:
+                    continue
+            peak = sorted(peak,key=lambda l:l[0])
+
+    def addRighNpoints(self, peak, npnt=5):
+        if npnt == 0:
+            return
+        else:
+            tmax = peak[-1][0]
+            for i in range(len(self.time)):
+                if fabs(self.time[i]-tmax) < 1e-6:
+                    npnt_ = npnt
+                    if i+npnt_ > len(self.time):
+                        while i + npnt_ > len(self.time):
+                            npnt_ -= 1
+
+                    for j in range(i, i+npnt_):
+                        peak.append([self.time[j], self.signal[j]])
+                else:
+                    continue
+            peak = sorted(peak,key=lambda l:l[0])
+
     def peaksplit(self, peaks):
         """ Method to split the peaks identified by getPeask() """
         #TODO: remove adjacet peaks within window size k

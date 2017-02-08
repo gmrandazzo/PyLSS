@@ -158,13 +158,17 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
             peaks = chrom.getPeaks()
             peaklst = chrom.peaksplit(peaks)
 
+            nleftpnt = self.leftpoints.value()
+            nrightpnt = self.rightpoints.value()
             pn = 1
             for i in range(len(peaklst)):
                 time_ = []
                 signal_ = []
                 #print "-"*10
+                chrom.addLeftNpoints(peaklst[i], nleftpnt)
+                chrom.addRighNpoints(peaklst[i], nrightpnt)
                 for row in peaklst[i]:
-                #    print row[0], row[1]
+                    #print row[0], row[1]
                     time_.append(row[0])
                     signal_.append(row[1])
 
