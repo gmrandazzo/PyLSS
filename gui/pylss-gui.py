@@ -9,10 +9,6 @@ Geneve February 2015
 
 import os
 import sys
-# pyinstaller bug under windows
-import Tkinter
-import FileDialog
-
 
 path = None
 try:
@@ -401,10 +397,10 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
 
                 #Create a cromatogram
                 peaks = BuildChromatogram(trtab, tg_soft, 0.01)
-                peaks = zip(*peaks)
+                peaks = list(zip(*peaks))
 
                 crit_peaks = BuildChromatogram(crit_trtab, tg_soft, 0.01)
-                crit_peaks = zip(*crit_peaks)
+                crit_peaks = list(zip(*crit_peaks))
 
                 y = []
                 x = []

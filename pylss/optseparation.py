@@ -83,7 +83,7 @@ class OptSep(object):
         self.v_m = float(v_m) # dead volume
         self.flow = float(flow) # flow rate for the logkw and s
         if v_d != None: # dwell volume (system volume)
-		    self.v_d = float(v_d)
+            self.v_d = float(v_d)
         self.logkw_s_tab = logkw_s_tab # table of lss parameters
         self.temp = [] # temperatures
         self.rs_min = 1.8  # resolution max
@@ -145,7 +145,7 @@ class OptSep(object):
         t0 = self.v_m *self.flow
         td = self.v_d *self.flow
         lssmol = SSGenerator(None, None, None, t0, self.v_d, self.flow)
-        print g_start_min, g_stop_min
+        print(g_start_min, g_stop_min)
         for init_b in np.linspace(g_start_min, g_start_max, 20, endpoint=True):
             for final_b in np.linspace(g_stop_min, g_stop_max, 20, endpoint=True):
                 for tg in drange(time_grad_min, time_grad_max,  2):
@@ -358,12 +358,12 @@ class OptSep(object):
                 return 9999
 
     def getgradientconditions(self, tr_min, tr_max):
-    	"""
-    	Optimize the gradient conditions
-    	finding different value of flow rate,
-    	initial and final organic solvent and time gradient.
-    	The equation to be used are these and the equation for the resolution
-    	it is the same of the isocratic conditions.
+        """
+        Optimize the gradient conditions
+        finding different value of flow rate,
+        initial and final organic solvent and time gradient.
+        The equation to be used are these and the equation for the resolution
+        it is the same of the isocratic conditions.
         """
         self.tr_min = tr_min
         self.tr_max = tr_max
@@ -467,12 +467,12 @@ class OptSep(object):
                 return 9999.
 
     def getloggradientconditions(self, tr_min, tr_max):
-    	"""
-    	Optimize the logarithmic gradient conditions
-    	finding different value of flow rate,
-    	initial and final organic solvent and time gradient.
-    	The equation to be used are these and the equation for the resolution
-    	it is the same of the isocratic conditions.
+        """
+        Optimize the logarithmic gradient conditions
+        finding different value of flow rate,
+        initial and final organic solvent and time gradient.
+        The equation to be used are these and the equation for the resolution
+        it is the same of the isocratic conditions.
         """
         self.maxtg = tr_max
         self.tr_min = tr_min

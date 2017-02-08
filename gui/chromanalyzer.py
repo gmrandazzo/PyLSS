@@ -9,9 +9,6 @@ Geneve January 2017
 
 import os
 import sys
-# pyinstaller bug under windows
-import Tkinter
-import FileDialog
 
 #Need matplotlib
 

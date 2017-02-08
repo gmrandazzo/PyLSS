@@ -229,7 +229,7 @@ def demo():
     for p in peaklst:
         for row in p:
             print ("%f\t%f" % (row[0], row[1]))
-        print "-"*10
+        print("-"*10)
 
 if __name__ == '__main__':
     demo()
