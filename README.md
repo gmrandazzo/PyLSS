@@ -51,8 +51,9 @@ Dependencies
 
 The required dependencies to use PyLSS are:
 
-- python
+- python version 2 or 3
 - numpy
+- scipy
 - matplotlib
 - PyQt5 to use the GUI
 
