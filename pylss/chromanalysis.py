@@ -8,8 +8,9 @@ chromanalysis will analyse a chromatogram to convert this into descriptors.
 
 Actually it contains some algorithms such as:
 
-- Central moments to describe the band broadeing
-  * Band variance (u1, u2)
+- Peak detection algorithm accordin the Peak-Valley Segmentation Algorithm
+- Central moments calculation to describe the band broadeing (Band variance: u1, u2)
+- Integration of the peak
 
 '''
 
@@ -20,7 +21,9 @@ from math import sqrt, fabs
 from os.path import isfile, basename
 
 class ChromAnalysis(object):
+    """ Chromatogram Analysis class """
     def __init__(self, time, signal, k=5, h=1.5):
+        """ init function """
         self.time = time
         self.signal = signal
         # peak detection settings
@@ -28,6 +31,7 @@ class ChromAnalysis(object):
         self.h = h
 
     def S1(self, x, i, k):
+        """ Peak function S1 """
         left = 0.
         for j in range(1, k+1):
             if x[i] - x[i-j] > left:
@@ -44,6 +48,7 @@ class ChromAnalysis(object):
         return (left + right) / 2.
 
     def S2(self, x, i, k):
+        """ Peak function S2 """
         avg_left = 0.
         for j in range(1, k+1):
             avg_left += x[i] - x[i-j]
@@ -56,6 +61,7 @@ class ChromAnalysis(object):
         return (avg_left + avg_right) / 2.
 
     def S3(self, x, i, k):
+        """ Peak function S3 """
         left = 0.
         for j in range(1, k+1):
             left +=  x[i-j]
@@ -70,6 +76,7 @@ class ChromAnalysis(object):
         return (left + right) / 2.
 
     def getPeaks(self):
+        """ Method to find peaks in chromatograms """
         peaks = []
         #default values
         #h = 1
@@ -112,7 +119,7 @@ class ChromAnalysis(object):
         return peaks
 
     def peaksplit(self, peaks):
-        #split peaks
+        """ Method to split the peaks identified by getPeask() """
         #TODO: remove adjacet peaks within window size k
         peaklst = []
         p = []
@@ -130,6 +137,7 @@ class ChromAnalysis(object):
         return peaklst
 
     def Mu1CentralMoment(self, time_, signal_):
+        """ Method to calculate the first moment """
         n = 0.
         d = 0.
         for i in range(len(time_)-1):
@@ -141,6 +149,7 @@ class ChromAnalysis(object):
             return 0.
 
     def Mu2CentralMoment(self, time_, signal_, u1_):
+        """ Method to calculate the second moment """
         if u1_ == 0 or u1_ == None:
             self.Mu1CentralMoment(time_, signal_)
 
@@ -154,26 +163,38 @@ class ChromAnalysis(object):
         else:
             return 0.
 
-def demo():
-    import sys
-    import string
-    fi = open(sys.argv[1], "r")
-    signal = []
-    time = []
-    for line in fi:
-        v = str.split(line.strip(), "\t")
-        time.append(float(v[0]))
-        signal.append(float(v[1]))
+    def integrate(self, y_vals, h):
+        """ Method to integrate according the simson rules """
+        i=1
+        total = y_vals[0] + y_vals[-1]
+        for y in y_vals[1:-1]:
+            if i%2 == 0:
+                total+=2*y
+            else:
+                total+=4*y
+            i+=1
+        return total*(h/3.0)
 
-    chrom = ChromAnalysis(time, signal)
+def demo():
+    """ Demo """
+    signal = [ 1. ,  1. ,  1. ,  1. ,  1. ,  1. ,  1. ,  1.1,  1. ,  0.8,  0.9,
+    1. ,  1.2,  0.9,  1. ,  1. ,  1.1,  1.2,  1. ,  1.5,  1. ,  3. ,
+    2. ,  5. ,  3. ,  2. ,  1. ,  1. ,  1. ,  0.9,  1. ,  1. ,  3. ,
+    2.6,  4. ,  3. ,  3.2,  2. ,  1. ,  1. ,  1. ,  1. ,  1. ]
+
+    time = [1, 2, 3, 4, 5, 6, 7, 88, 9, 10, 11,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21 ,22,
+    23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+    34, 35, 36, 37, 38, 39, 40, 41, 42, 43]
+
+    chrom = ChromAnalysis(time, signal, k=4, h=1.5)
     peaks = chrom.getPeaks()
     peaklst = chrom.peaksplit(peaks)
-    fo = open(sys.argv[2], "w")
+
     for p in peaklst:
         for row in p:
-            fo.write("%f\t%f\n" % (row[0], row[1]))
-        fo.write("end\n")
-        #print ("%f\t%f" % (row[0], row[1]))
+            print ("%f\t%f" % (row[0], row[1]))
+        print "-"*10
 
 if __name__ == '__main__':
     demo()
