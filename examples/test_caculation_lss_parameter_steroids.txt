@@ -1,0 +1,12 @@
+Time zero: 0.969
+Dwell Volume: 0.375
+Flow Rate: 0.30
+Gradient 1: 14 5 95
+Gradient 2: 60 5 95
+17a-Hydroxyprogesterone;10.91;30.19
+Androstenedione;10.78;29.26
+Cortisol (hydrocortisone);7.62;19.17
+Cortisone;7.75;19.56
+DHEA;10.88;29.95
+4.5a-Dihydrotestosterone (5a-DHT);11.49;31.93
+Testosterone;10.31;27.93

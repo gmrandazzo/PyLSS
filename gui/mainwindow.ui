@@ -15,84 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_11">
-    <item row="0" column="1">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>292</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="title">
-       <string>Plot options</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_7">
-       <item row="0" column="0">
-        <widget class="QPushButton" name="zoomButton">
-         <property name="minimumSize">
-          <size>
-           <width>90</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>90</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Zoom</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="panButton">
-         <property name="minimumSize">
-          <size>
-           <width>90</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>90</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Pan</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QPushButton" name="rescaleButton">
-         <property name="minimumSize">
-          <size>
-           <width>90</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>90</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Rescale</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
     <item row="1" column="1" colspan="2">
      <widget class="QGroupBox" name="plotterBox">
       <property name="minimumSize">
@@ -164,8 +86,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>240</width>
-            <height>558</height>
+            <width>225</width>
+            <height>459</height>
            </rect>
           </property>
           <attribute name="label">
@@ -410,35 +332,158 @@
        <item row="0" column="0">
         <widget class="QTableView" name="tableView"/>
        </item>
+       <item row="0" column="1">
+        <widget class="QPlainTextEdit" name="plainTextEdit">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>9999999</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="plainText">
+          <string>Critical resolution: 1.80
+Molecules: 
+  - A
+  - B</string>
+         </property>
+         <property name="overwriteMode">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
-    <item row="0" column="2">
-     <widget class="QPlainTextEdit" name="plainTextEdit">
+    <item row="0" column="1" colspan="2">
+     <widget class="QGroupBox" name="groupBox">
       <property name="minimumSize">
        <size>
-        <width>240</width>
+        <width>0</width>
         <height>60</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>9999999</width>
+        <width>16777215</width>
         <height>60</height>
        </size>
       </property>
-      <property name="readOnly">
-       <bool>true</bool>
+      <property name="title">
+       <string>Plot options</string>
       </property>
-      <property name="plainText">
-       <string>Critical resolution: 1.80
-Molecules: 
-  - A
-  - B</string>
-      </property>
-      <property name="overwriteMode">
-       <bool>true</bool>
-      </property>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="zoomButton">
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Zoom</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="panButton">
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Pan</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="rescaleButton">
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Rescale</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QPushButton" name="exportchromatogramButton">
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>999999</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Export chromatogram</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QPushButton" name="setplotoptionsButton">
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>9999999</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Set plot options</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>

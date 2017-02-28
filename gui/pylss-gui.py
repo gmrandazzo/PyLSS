@@ -89,6 +89,8 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
         self.zoomButton.clicked.connect(self.zoom)
         self.panButton.clicked.connect(self.pan)
         self.rescaleButton.clicked.connect(self.home)
+        self.exportchromatogramButton.clicked.connect(self.exportchromatogram)
+        self.setplotoptionsButton.clicked.connect(self.setplotoptions)
         self.modelBox.currentIndexChanged.connect(self.gradientanalyser)
         self.doubleSpinBox_1.valueChanged.connect(self.gradientanalyser)
         self.doubleSpinBox_2.valueChanged.connect(self.gradientanalyser)
@@ -128,6 +130,9 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
         # constant parameters
         self.crit_resolution = 1.8
         self.crit_alpha = 1.1
+
+        self.peaks = None
+        self.crit_peaks = None
 
     def openTableMenu(self, position):
         """ context menu event """
@@ -177,10 +182,45 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
 
     def home(self):
         self.toolbar.home()
+
     def zoom(self):
         self.toolbar.zoom()
+
     def pan(self):
         self.toolbar.pan()
+
+    def setplotoptions(self):
+        return
+
+    def exportchromatogram(self):
+        if self.peaks != None and self.crit_peaks != None:
+            fname, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)")
+            print(os.path.exists(fname))
+            if not os.path.exists(fname):
+                y = []
+                x = []
+                for i in range(len(self.peaks)):
+                    x.append(self.peaks[i][0])
+                    y.append(0.)
+                    for j in range(1, len(self.peaks[0])):
+                        y[-1] += self.peaks[i][j]
+
+                crit_y = []
+                crit_x = []
+                for i in range(len(self.crit_peaks)):
+                    crit_x.append(self.crit_peaks[i][0])
+                    crit_y.append(0.)
+                    for j in range(1, len(self.crit_peaks[0])):
+                        crit_y[-1] += self.crit_peaks[i][j]
+
+                fo = open(fname, "w")
+                for i in range(len(x)):
+                    fo.write("%.4f;%.4f\n" % (x[i], y[i]))
+                for i in range(len(crit_x)):
+                    fo.write("%.4f;%.4f\n" % (crit_x[i], crit_y[i]))
+                fo.close()
+        else:
+            return
 
     def plotchromatogram(self):
         ''' plot some random stuff '''
@@ -396,29 +436,26 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
                 self.plainTextEdit.appendPlainText("Total critical couples: %d" % (ncc))
 
                 #Create a cromatogram
-                peaks = BuildChromatogram(trtab, tg_soft, 0.01)
-                peaks = list(zip(*peaks))
-
-                crit_peaks = BuildChromatogram(crit_trtab, tg_soft, 0.01)
-                crit_peaks = list(zip(*crit_peaks))
+                self.peaks = list(zip(*BuildChromatogram(trtab, tg_soft, 0.01)))
+                self.crit_peaks = list(zip(*BuildChromatogram(crit_trtab, tg_soft, 0.01)))
 
                 y = []
                 x = []
-                for i in range(len(peaks)):
-                    x.append(peaks[i][0])
+                for i in range(len(self.peaks)):
+                    x.append(self.peaks[i][0])
                     y.append(0.)
-                    len(peaks[0])
-                    for j in range(1, len(peaks[0])):
-                        y[-1] += peaks[i][j]
+                    #len(self.peaks[0])
+                    for j in range(1, len(self.peaks[0])):
+                        y[-1] += self.peaks[i][j]
 
                 crit_y = []
                 crit_x = []
-                for i in range(len(crit_peaks)):
-                    crit_x.append(crit_peaks[i][0])
+                for i in range(len(self.crit_peaks)):
+                    crit_x.append(self.crit_peaks[i][0])
                     crit_y.append(0.)
-                    len(peaks[0])
-                    for j in range(1, len(crit_peaks[0])):
-                        crit_y[-1] += crit_peaks[i][j]
+                    #len(peaks[0])
+                    for j in range(1, len(self.crit_peaks[0])):
+                        crit_y[-1] += self.crit_peaks[i][j]
                 ax = self.figure.add_subplot(111)
                 ax.clear()
                 ax.plot(x, y, "b", crit_x, crit_y, "r")
