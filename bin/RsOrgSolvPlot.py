@@ -3,36 +3,41 @@
 import os
 import sys
 
-path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+path = None
+try:
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+except NameError:
+    path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+path += "/pylss"
 if not path in sys.path:
     sys.path.insert(1, path)
 del path
 
-from pylss.ssengine import *
-from pylss.optseparation import *
+from ssengine import *
+from optseparation import *
 
 def main():
     """ Main function """
     if len(sys.argv) != 2:
-        print "Usage: %s <input file>" % (sys.argv[0])
-        print "\nInput File Format\n:"
-        print "Column Lenght: 150"
-        print "Column Diamter: 2.1"
-        print "Column Porosity: 0.7"
-        print "Time zero: 0.969 #to avoid the column parameters..."
-        print "Dwell Volume: 0.9"
-        print "%B Start: 5"
-        print "%B End: 95"
-        print "Flow Rate: 0.25"
-        print "Time Gradient 1: 5"
-        print "Time Gradient 2: 15"
-        print "END"
-        print "2.32\t4.64"
-        print "3.42\t6.86"
-        print "3.42\t6.86"
-        print "...................."
-        print "...................."
-        print "....................\n"
+        print("Usage: %s <input file>" % (sys.argv[0]))
+        print("\nInput File Format\n:")
+        print("Column Lenght: 150")
+        print("Column Diamter: 2.1")
+        print("Column Porosity: 0.7")
+        print("Time zero: 0.969 #to avoid the column parameters...")
+        print("Dwell Volume: 0.9")
+        print("%B Start: 5")
+        print("%B End: 95")
+        print("Flow Rate: 0.25")
+        print("Time Gradient 1: 5")
+        print("Time Gradient 2: 15")
+        print("END")
+        print("2.32\t4.64")
+        print("3.42\t6.86")
+        print("3.42\t6.86")
+        print("....................")
+        print("....................")
+        print("....................\n")
     else:
         fi = open(sys.argv[1], "r")
         logkw_s_tab = []

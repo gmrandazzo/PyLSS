@@ -59,3 +59,27 @@ def PlotChromatogram(peaks):
     ylabel('Signal')
     grid(True)
     show()
+
+def PlotDelayedChromatogram(peaks):
+    import matplotlib.pyplot as plt
+    time = []
+    signal = []
+    for j in range(1, len(peaks[0])):
+        time.append(peaks[0][j])
+        signal.append(float(0))
+
+    for i in range(1, len(peaks)):
+        for j in range(1, len(peaks[i])):
+            signal[j-1] += peaks[i][j]
+
+    plt.axis([0, max(time), -1, max(signal)+0.2*max(signal)])
+    plt.ion()
+
+    for i in range(1, len(time)):
+        plt.scatter(time[i], signal[i], s=0.2)
+        plt.pause(0.02)
+
+    while True:
+        plt.pause(0.02)
+
+

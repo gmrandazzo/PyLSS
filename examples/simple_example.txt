@@ -1,0 +1,9 @@
+Time zero: 0.969
+Dwell Volume: 0.375
+Flow Rate: 0.30
+Gradient 1: 14 5 95
+Gradient 2: 60 5 95
+19-Hydroxytestosterone;7.31;17.94
+6a-Hydroxytestosterone;7.03;16.76
+7a-Hydroxy-DHEA;7.29;17.65
+7b-Hydroxy-DHEA;7.29;17.65

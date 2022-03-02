@@ -16,6 +16,7 @@ try:
 except NameError:
     path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 path += "/pylss"
+print(path)
 if not path in sys.path:
     sys.path.insert(1, path)
 del path
@@ -97,6 +98,7 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
         self.doubleSpinBox_3.valueChanged.connect(self.gradientanalyser)
         self.doubleSpinBox_4.valueChanged.connect(self.gradientanalyser)
         self.doubleSpinBox_5.valueChanged.connect(self.gradientanalyser)
+        self.doubleSpinBox_6.valueChanged.connect(self.gradientanalyser)
         self.ColumnLenghtSpinBox.valueChanged.connect(self.gradientanalyser)
         self.CulumnDiameterSpinBox.valueChanged.connect(self.gradientanalyser)
         self.ColumnPorositySpinBox.valueChanged.connect(self.gradientanalyser)
@@ -361,9 +363,10 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
             #if c_length > 0 and c_diameter > 0 and c_porosity > 0:
             #    v_m = ((square(self.c_diameter)*self.c_length*pi*self.c_porosity)/4.)/1000.
             #else:
-            v_m = self.modellst[indx].v_m
-
-            t0_soft = float(v_m/flow_sofware)
+            #
+            #v_m = self.modellst[indx].v_m
+            #t0_soft = float(v_m/flow_sofware)
+            t0_soft = float(self.doubleSpinBox_6.value())
             td_soft = float(v_d/flow_sofware)
 
             A = 1.0
@@ -456,6 +459,7 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
                     #len(peaks[0])
                     for j in range(1, len(self.crit_peaks[0])):
                         crit_y[-1] += self.crit_peaks[i][j]
+                self.figure.clear()
                 ax = self.figure.add_subplot(111)
                 ax.clear()
                 ax.plot(x, y, "b", crit_x, crit_y, "r")

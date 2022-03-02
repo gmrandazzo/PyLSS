@@ -6,38 +6,41 @@ import sys
 import matplotlib.pyplot as plt
 import scipy.interpolate
 
-
-path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+path = None
+try:
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+except NameError:
+    path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+path += "/pylss"
 if not path in sys.path:
     sys.path.insert(1, path)
 del path
-
-from pylss.ssengine import *
-from pylss.optseparation import *
-from pylss.plotengine import *
+from ssengine import *
+from optseparation import *
+from plotengine import *
 
 def main():
     """ Main function """
     if len(sys.argv) != 3:
-        print "Usage: %s <input file Temperature 1> <input file Temperature 2> where t2 > t1" % (sys.argv[0])
-        print "\nInput File Format\n:"
-        print "Column Lenght: 150"
-        print "Column Diamter: 2.1"
-        print "Column Porosity: 0.7"
-        print "Time zero: 0.969 #to avoid the column parameters..."
-        print "Dwell Volume: 0.9"
-        print "%B Start: 5"
-        print "%B End: 95"
-        print "Flow Rate: 0.25"
-        print "Time Gradient 1: 5"
-        print "Time Gradient 2: 15"
-        print "END"
-        print "2.32\t4.64"
-        print "3.42\t6.86"
-        print "3.42\t6.86"
-        print "...................."
-        print "...................."
-        print "....................\n"
+        print("Usage: %s <input file Temperature 1> <input file Temperature 2> where t2 > t1" % (sys.argv[0]))
+        print("\nInput File Format\n:")
+        print("Column Lenght: 150")
+        print("Column Diamter: 2.1")
+        print("Column Porosity: 0.7")
+        print("Time zero: 0.969 #to avoid the column parameters...")
+        print("Dwell Volume: 0.9")
+        print("%B Start: 5")
+        print("%B End: 95")
+        print("Flow Rate: 0.25")
+        print("Time Gradient 1: 5")
+        print("Time Gradient 2: 15")
+        print("END")
+        print("2.32\t4.64")
+        print("3.42\t6.86")
+        print("3.42\t6.86")
+        print("....................")
+        print("....................")
+        print("....................\n")
     else:
         fi = open(sys.argv[1], "r")
         logkw_s_tab_t1 = []
@@ -139,7 +142,7 @@ def main():
             qlogk = (t2*logkw_s_tab_t1[i][0] - t1*logkw_s_tab_t2[i][0]) / (t2-t1)
             mS = (logkw_s_tab_t2[i][1]-logkw_s_tab_t1[i][1]) / (t2-t1)
             qS = (t2*logkw_s_tab_t1[i][1] - t1*logkw_s_tab_t2[i][1]) / (t2-t1)
-            print mlogk, qlogk, -1*mS, -1*qS # -1 for the hplc simulatir application
+            print(mlogk, qlogk, -1*mS, -1*qS) # -1 for the hplc simulatir application
 
         fo = open("experimental_design.txt", "w")
         fo.write("Experiment name;Start B;End B;gradient time;temperature;int1-2;int1-3;int1-4;int2-3;int2-4;int3-4;1^2;2^2;3^2;4^2;selectivity\n")
@@ -163,7 +166,7 @@ def main():
             lssparam.append([(mlogk*25 +qlogk), (mS*25 +qS)])
 
             trpred = lssmol.rtpred(lssparam[-1][0], lssparam[-1][1], 5, 0.05, 0.95, t0, v_d/flow)
-            print trpred
+            print(trpred)
 
         p = 0
         for i in range(len(init_b)):
@@ -187,9 +190,8 @@ def main():
                         p+=1
         fo.close()
 
-
         for t in drange(t1, t2+1, 5):
-            print "Temperature %f" % (t)
+            print("Temperature %f" % (t))
             temps.append(t)
             logkw_s_tab = []
             for i in range(len(logkw_s_tab_t1)):
@@ -277,11 +279,11 @@ def main():
             gcondlst.append(gcond)
             trlst.append(tr)
         bestrs = Rslst.index(max(Rslst))
-        print "Best Gradient Conditions Rs: %f at temperature %f" % (Rslst[bestrs], temps[bestrs])
+        print("Best Gradient Conditions Rs: %f at temperature %f" % (Rslst[bestrs], temps[bestrs])
         gcond = gcondlst[bestrs]
-        print "init B: %f\nfinal B: %f\nTime Gradient:%f\n" % (gcond[0], gcond[1], gcond[2])
+        print("init B: %f\nfinal B: %f\nTime Gradient:%f\n" % (gcond[0], gcond[1], gcond[2])
         for time in tr:
-            print "%.2f" % (time)
+            print("%.2f" % (time)
             """
             #[gconds, rs, trs] = opt.getplotgradientconditions()
             #indxlst  = []

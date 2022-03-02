@@ -51,7 +51,7 @@
             <x>0</x>
             <y>0</y>
             <width>240</width>
-            <height>558</height>
+            <height>549</height>
            </rect>
           </property>
           <attribute name="label">
@@ -86,14 +86,27 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>225</width>
-            <height>459</height>
+            <width>240</width>
+            <height>549</height>
            </rect>
           </property>
           <attribute name="label">
            <string>Gradient Parameters</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_5">
+           <item row="7" column="0">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="singleStep">
+              <double>0.050000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.969000000000000</double>
+             </property>
+            </widget>
+           </item>
            <item row="5" column="0">
             <layout class="QGridLayout" name="gridLayout_2">
              <item row="0" column="2">
@@ -208,7 +221,7 @@
              </item>
             </layout>
            </item>
-           <item row="6" column="0">
+           <item row="8" column="0">
             <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
               <widget class="QLabel" name="label_14">
@@ -303,6 +316,13 @@
               </widget>
              </item>
             </layout>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>t0</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>

@@ -155,18 +155,20 @@ class SSGenerator(object):
                 logk0 = logkw - S*(init_B)
                 k0 = pow(10, logk0)
                 tr_pred = ((t0/b) * log10(2.3*k0*b+1))+ t0 + td
-
-
+                return tr_pred
                 """
                 personal resolution. Better and powerfull!!
-
-                lnk0 = logkw - S*(init_B)
-                k0 = exp(lnk0)
-                #iso = (td+tiso)/(t0*k0) #We thake into account an initial isocratic step.
-                # add (t0 - iso)
-                tr_pred = log(b*k0*(t0)+1)/b + t0 + td
+                
+                try:
+                    lnk0 = logkw - S*(init_B)
+                    k0 = exp(lnk0)
+                    #iso = (td+tiso)/(t0*k0) #We thake into account an initial isocratic step.
+                    # add (t0 - iso)
+                    tr_pred = (log(b*k0*(t0)+1)/b) + t0 + td
+                    return tr_pred
+                except OverflowError:
+                    return 9999
                 """
-                return tr_pred
             else:
                 return 9999
         else:

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.7.1
+# Created by: PyQt5 UI code generator 5.9
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -28,7 +28,7 @@ class Ui_MainWindow(object):
         self.toolBox = QtWidgets.QToolBox(self.settingBox)
         self.toolBox.setObjectName("toolBox")
         self.page = QtWidgets.QWidget()
-        self.page.setGeometry(QtCore.QRect(0, 0, 240, 558))
+        self.page.setGeometry(QtCore.QRect(0, 0, 240, 549))
         self.page.setObjectName("page")
         self.gridLayout_8 = QtWidgets.QGridLayout(self.page)
         self.gridLayout_8.setContentsMargins(0, 0, 0, 0)
@@ -45,11 +45,17 @@ class Ui_MainWindow(object):
         self.gridLayout_8.addWidget(self.listView, 1, 0, 1, 2)
         self.toolBox.addItem(self.page, "")
         self.page_2 = QtWidgets.QWidget()
-        self.page_2.setGeometry(QtCore.QRect(0, 0, 225, 459))
+        self.page_2.setGeometry(QtCore.QRect(0, 0, 240, 549))
         self.page_2.setObjectName("page_2")
         self.gridLayout_5 = QtWidgets.QGridLayout(self.page_2)
         self.gridLayout_5.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_5.setObjectName("gridLayout_5")
+        self.doubleSpinBox_6 = QtWidgets.QDoubleSpinBox(self.page_2)
+        self.doubleSpinBox_6.setDecimals(3)
+        self.doubleSpinBox_6.setSingleStep(0.05)
+        self.doubleSpinBox_6.setProperty("value", 0.969)
+        self.doubleSpinBox_6.setObjectName("doubleSpinBox_6")
+        self.gridLayout_5.addWidget(self.doubleSpinBox_6, 7, 0, 1, 1)
         self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.label_9 = QtWidgets.QLabel(self.page_2)
@@ -119,7 +125,7 @@ class Ui_MainWindow(object):
         self.doubleSpinBox_5.setProperty("value", 0.37)
         self.doubleSpinBox_5.setObjectName("doubleSpinBox_5")
         self.verticalLayout_2.addWidget(self.doubleSpinBox_5)
-        self.gridLayout_5.addLayout(self.verticalLayout_2, 6, 0, 1, 1)
+        self.gridLayout_5.addLayout(self.verticalLayout_2, 8, 0, 1, 1)
         self.gridLayout_4 = QtWidgets.QGridLayout()
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.label_2 = QtWidgets.QLabel(self.page_2)
@@ -155,6 +161,9 @@ class Ui_MainWindow(object):
         self.doubleSpinBox_1.setObjectName("doubleSpinBox_1")
         self.verticalLayout.addWidget(self.doubleSpinBox_1)
         self.gridLayout_5.addLayout(self.verticalLayout, 1, 0, 1, 1)
+        self.label_12 = QtWidgets.QLabel(self.page_2)
+        self.label_12.setObjectName("label_12")
+        self.gridLayout_5.addWidget(self.label_12, 6, 0, 1, 1)
         self.toolBox.addItem(self.page_2, "")
         self.gridLayout.addWidget(self.toolBox, 0, 0, 1, 1)
         self.gridLayout_11.addWidget(self.settingBox, 0, 0, 3, 1)
@@ -291,6 +300,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "Gradient Start"))
         self.label_3.setText(_translate("MainWindow", "Gradient End"))
         self.label.setText(_translate("MainWindow", "Flow Rate"))
+        self.label_12.setText(_translate("MainWindow", "t0"))
         self.toolBox.setItemText(self.toolBox.indexOf(self.page_2), _translate("MainWindow", "Gradient Parameters"))
         self.plotterBox_2.setTitle(_translate("MainWindow", "Data"))
         self.plainTextEdit.setPlainText(_translate("MainWindow", "Critical resolution: 1.80\n"
