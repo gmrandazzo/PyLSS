@@ -65,9 +65,8 @@ To install for all users on Unix/Linux/OSX/Windows:
   python setup.py install
 
 To use the GUI:
-  - install PyQt4 https://sourceforge.net/projects/pyqt/
-  - go into the directory gui and do "make"
-  - run python main.py to visualize the interface
+  - install PyQt5: pip install pyqt5
+  - run python3 pylss-guy.py to visualize the GUI.
 
 How to use the command line?
 =======
