@@ -54,9 +54,9 @@ Chromatography.
 '''
 
 #from scipy.optimize import fmin
-from optimizer import simplex as fmin
+from .optimizer import simplex as fmin
 from math import sqrt, pi, log, log10, log, exp, fabs, isnan, isinf, erf
-from miscalgoritms import *
+from .miscalgoritms import *
 
 class SSGenerator(object):
     """Perform the generation of Linea/Logarithmic Solvent Strength parameters logKw and S

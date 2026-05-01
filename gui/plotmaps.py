@@ -7,16 +7,15 @@ and is distributed under LGPL version 3
 Geneve October 2016
 '''
 
-from PyQt5 import *
-from PyQt5 import *
+from PyQt6 import QtCore, QtGui, QtWidgets
 import sys
 
-from gui_plotmaps import Ui_PlotMaps
+from .gui_plotmaps import Ui_PlotMaps
 
-from optseparation import *
+from pylss.optseparation import *
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.pyplot as plt
@@ -57,7 +56,6 @@ class PlotMaps(QtWidgets.QDialog, Ui_PlotMaps):
         ''' plot some random stuff '''
         data = [random.random() for i in range(25)]
         ax = self.figure.add_subplot(111)
-        ax.hold(False)
         ax.plot(data, '*-')
         self.canvas.draw()
 
@@ -84,18 +82,22 @@ class PlotMaps(QtWidgets.QDialog, Ui_PlotMaps):
           y_tg = []
           z = []
           for i in range(len(gcondlst)):
-              #gcondlst.append([init_b, final_b, tg, self.flow, lowest_alpha])
+              #gcondlst.append([init_b, final_b, tg, self.flow, lowestrs])
               x.append(float(gcondlst[i][0])*100)
               y_gsteepness.append(float((gcondlst[i][1]-gcondlst[i][0])/gcondlst[i][2])) # alpha
               y_final_b.append(float(gcondlst[i][1])*100) # final b
               y_tg.append(float(gcondlst[i][2])) # tg
-              z.append(float(gcondlst[i][-1]))
+              z.append(float(gcondlst[i][-1])) # lowestrs
 
           x = np.asarray(x)
           y_gsteepness = np.asarray(y_gsteepness)
           y_final_b = np.asarray(y_final_b)
           y_tg = np.asarray(y_tg)
           z = np.asarray(z)
+
+          if x.size == 0:
+              print("No valid conditions found for the map.")
+              return
 
           # Set up a regular grid of interpolation points
           npoints = 500
@@ -171,6 +173,10 @@ class PlotMaps(QtWidgets.QDialog, Ui_PlotMaps):
           y_final_b = np.asarray(y_final_b)
           y_tg = np.asarray(y_tg)
           z = np.asarray(z)
+
+          if x.size == 0:
+              print("No valid conditions found for the map.")
+              return
 
           # Set up a regular grid of interpolation points
           npoints = 500

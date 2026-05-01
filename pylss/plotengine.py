@@ -72,7 +72,7 @@ def PlotDelayedChromatogram(peaks):
         for j in range(1, len(peaks[i])):
             signal[j-1] += peaks[i][j]
 
-    plt.axis([0, max(time), -1, max(signal)+0.2*max(signal)])
+    plt.axis((0, max(time), -1, max(signal)+0.2*max(signal)))
     plt.ion()
 
     for i in range(1, len(time)):

@@ -7,16 +7,15 @@ and is distributed under LGPL version 3
 Geneve February 2015
 '''
 
-from PyQt5 import *
-from PyQt5 import *
+from PyQt6 import QtCore, QtGui, QtWidgets
 import sys
 
-from gui_automaticelutionwindowstretching import Ui_AutomaticElutionWindowStretching
+from .gui_automaticelutionwindowstretching import Ui_AutomaticElutionWindowStretching
 
-from optseparation import *
+from pylss.optseparation import *
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
@@ -26,7 +25,7 @@ import numpy as np
 
 class AutomaticElutionWindowStretching(QtWidgets.QDialog, Ui_AutomaticElutionWindowStretching):
     def __init__(self, modellst, parent=None):
-        QtGui.QDialog.__init__(self,parent)
+        QtWidgets.QDialog.__init__(self,parent)
         self.setupUi(self)
         self.closeButton.clicked.connect(self.close_)
         self.calculateButton.clicked.connect(self.calculate)

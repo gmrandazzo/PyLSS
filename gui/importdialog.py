@@ -7,13 +7,13 @@ and is distributed under LGPL version 3
 Geneve February 2015
 '''
 
-from PyQt5 import *
-from PyQt5 import *
+from PyQt6 import QtCore, QtGui, QtWidgets
 import sys
 
-from gui_importdialog import Ui_ImportDialog
+from .gui_importdialog import Ui_ImportDialog
 from os.path import isfile, basename
-from utilities import *
+from .utilities import TableModel, nsplit
+from pylss.io import parse_lss_input
 
 class ImportDialog(QtWidgets.QDialog, Ui_ImportDialog):
     def __init__(self,parent=None):
@@ -42,119 +42,93 @@ class ImportDialog(QtWidgets.QDialog, Ui_ImportDialog):
         self.accept()
 
     def preview(self):
-        f = open(self.lineEdit.text())
+        if not isfile(self.lineEdit.text()):
+            return
+            
+        experiment = parse_lss_input(self.lineEdit.text())
         self.tablemodel.clean()
-        i = 0
+        
+        # Update spinboxes
+        if experiment.dwell_volume: self.dwelVolSpinBox.setValue(experiment.dwell_volume)
+        if experiment.flow_rate: self.flowrateSpinBox.setValue(experiment.flow_rate)
+        if experiment.t0: self.t0SpinBox.setValue(experiment.t0)
+        
         grad = []
         tg = []
-        for line in f:
-            if "dwell volume" in line.lower():
-                self.dwelVolSpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
-            elif "flow rate" in line.lower():
-                self.flowrateSpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
-            elif "time zero" in line.lower():
-                self.t0SpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
-            elif "gradient " in line.lower(): # Each line is a gradient column
-                v = str.split(line.strip(), ":")[-1].strip()
-                v = str.split(v, " ")
-                tg.append(float(v[0]))
-                grad.append([float(v[1])/100., float(v[2])/100.])
-            elif "column length" in line.lower():
-                continue
-            elif "column diameter" in line.lower():
-                continue
-            elif "column particle" in line.lower():
-                continue
-            elif "temperature" in line.lower():
-                continue
+        for g in experiment.gradients:
+            tg.append(float(g[0]))
+            grad.append([float(g[1])/100., float(g[2])/100.])
+            
+        header = ["Molecule"]
+        for j in range(len(grad)):
+            header.append("%.1f%% %.1f%% %.1f min" % (round(grad[j][0]*100,1), round(grad[j][1]*100,1), tg[j]))
+        self.tablemodel.setHeader(header)
+
+        for i, v in enumerate(experiment.data[:11]): # Preview first 10 rows
+            if not v or v[0].lower() == 'molecule': continue
+            
+            row: list = []
+            if i < 10:
+                # Use robust detection for molecule name
+                try:
+                    float(v[0])
+                    # Numeric, use auto-name
+                    row.append("Molecule %d" % (i+1))
+                    for item in v:
+                        try:
+                            row.append(float(item))
+                        except:
+                            row.append(item)
+                except ValueError:
+                    # String, use it as name
+                    row.append(v[0])
+                    for j in range(1, len(v)):
+                        try:
+                            row.append(float(v[j]))
+                        except:
+                            row.append(v[j])
+                
+                self.tablemodel.addRow(row)
             else:
-                v = nsplit(line.strip(), self.splitlineby.currentText())
-                row = []
-                if i < 10:
-                    if i == 0:
-                        header = []
-                        header.append("Molecule")
-                        for j in range(len(grad)):
-                            header.append("%.1f%% %.1f%% %.1f min" % (round(grad[j][0]*100,1), round(grad[j][1]*100,1), tg[j]))
-                        self.tablemodel.setHeader(header)
-                        #self.tableView.model().layoutChanged.emit()
-
-                    if self.firstcolobjname.isChecked():
-                        row.append(v[0])
-                        for j in range(1, len(v)):
-                            try:
-                                row.append(float(v[j]))
-                            except:
-                                row.append(v[j])
-                    else:
-                        row.append("Molecule %d" % (i+1))
-                        for item in v:
-                            try:
-                                row.append(float(item))
-                            except:
-                                row.append(item)
-                    self.tablemodel.addRow(row)
-                    #self.tableView.model().layoutAboutToBeChanged.emit()
-                    #self.tableView.model().layoutChanged.emit()
-                    #self.tableView.model().layoutChanged.emit()
-                    i += 1
-                else:
+                row.append("...")
+                for j in range(len(v)):
                     row.append("...")
-                    for j in range(len(v)):
-                        row.append("...")
-                    self.tablemodel.addRow(row)
-                    #self.tableView.model().layoutAboutToBeChanged.emit()
-                    #self.tableView.model().layoutChanged.emit()
-                    #self.tableView.model().layoutChanged.emit()
-                    break
-
-        f.close()
+                self.tablemodel.addRow(row)
+                break
 
     def getdata(self):
-        trdata = []
+        experiment = parse_lss_input(self.lineEdit.text())
+        
+        trdata: list[list[float]] = []
         molname = []
         grad = []
         tg = []
-        c_length = 15
-        c_diameter = 2.1
-        c_particle = 1.7
-        f = open(self.lineEdit.text())
-        self.tablemodel.clean()
-        i = 0
-        for line in f:
-            if "dwell volume" in line.lower():
-                self.dwelVolSpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
-            elif "flow rate" in line.lower():
-                self.flowrateSpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
-            elif "time zero" in line.lower():
-                self.t0SpinBox.setValue(float(nsplit(line.strip(), ":")[-1]))
-            elif "gradient " in line.lower(): # Each line is a gradient column
-                v = str.split(line.strip(), ":")[-1].strip()
-                v = str.split(v, " ")
-                tg.append(float(v[0]))
-                grad.append([float(v[1])/100., float(v[2])/100.])
-            elif "column length" in line.lower():
-                c_length = float(str.split(line.strip(), ":")[-1].strip())
-            elif "column diameter" in line.lower():
-                c_diameter = float(str.split(line.strip(), ":")[-1].strip())
-            elif "column particle" in line.lower():
-                c_particle = float(str.split(line.strip(), ":")[-1].strip())
-            elif "temperature" in line.lower():
-                continue
-            else:
-                v = nsplit(line.strip(), self.splitlineby.currentText())
-                trdata.append(list())
-                if self.firstcolobjname.isChecked():
-                    molname.append(v[0])
-                    for j in range(1, len(v)):
-                        trdata[-1].append(float(v[j]))
-                else:
-                    molname.append("Molecule %d" % (i+1))
-                    for item in v:
-                        trdata[-1].append(float(item))
-                i += 1
-        f.close()
+        
+        c_length = experiment.column_length
+        c_diameter = experiment.column_diameter
+        c_particle = experiment.column_particle
+        
+        for g in experiment.gradients:
+            tg.append(float(g[0]))
+            grad.append([float(g[1])/100., float(g[2])/100.])
 
+        for i, v in enumerate(experiment.data):
+            if not v or v[0].lower() == 'molecule': continue
+            
+            trdata.append(list())
+            # Logic to handle molecule names
+            try:
+                float(v[0])
+                # It's a number, so it's a retention time
+                molname.append("Molecule %d" % (len(trdata)))
+                for item in v:
+                    trdata[-1].append(float(item))
+            except ValueError:
+                # It's a string, likely the molecule name
+                molname.append(v[0])
+                for j in range(1, len(v)):
+                    trdata[-1].append(float(v[j]))
+        
         return [self.lineEdit_2.text(), molname, trdata, grad, tg,
                 self.dwelVolSpinBox.value(), self.t0SpinBox.value(),
                 self.flowrateSpinBox.value(), c_length, c_diameter, c_particle]

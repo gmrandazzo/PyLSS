@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pylss"
+version = "0.1.0"
+description = "Python package for linear solvent strength calculations"
+readme = "README.md"
+authors = [
+  { name = "Giuseppe Marco Randazzo", email = "gmrandazzo@gmail.com" }
+]
+license = { text = "LGPL" }
+dependencies = [
+  "numpy",
+  "matplotlib",
+  "scipy",
+  "PyQt6",
+  "PyYAML",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+dev = [
+    "mypy",
+    "types-PyYAML",
+]
+
+[project.gui-scripts]
+pylss-gui = "gui.pylss_gui:main"
+pylss-chromanalyzer = "gui.chromanalyzer:main"
+
+[project.scripts]
+pylss-lssgen = "bin.lssgen:main"
+pylss-lssopt = "bin.lssoptseparation:main"
+pylss-logssgen = "bin.logssgen:main"
+pylss-logssopt = "bin.logssoptseparation:main"
+pylss-makechrom = "bin.MakeChromatogram:main"
+
+[project.urls]
+Homepage = "https://github.com/gmrandazzo/PyLSS"
+
+[tool.setuptools]
+packages = ["pylss", "gui", "bin"]

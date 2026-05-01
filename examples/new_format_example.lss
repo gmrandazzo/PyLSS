@@ -1,0 +1,12 @@
+---
+t0: 0.969
+dwell_volume: 0.375
+flow_rate: 0.30
+gradients:
+  - [14, 5, 95]
+  - [60, 5, 96]
+---
+Molecule; Tr1; Tr2
+Compound_1; 8.53; 22.11
+Compound_2; 9.07; 24.54
+Compound_3; 10.48; 28.84

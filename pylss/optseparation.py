@@ -10,10 +10,10 @@ automatically trough the L-BFGS-B method.
 
 '''
 
-from optimizer import simplex as fmin
-from gradientutils import *
+from .optimizer import simplex as fmin
+from .gradientutils import *
 from math import sqrt, log10, log, fabs, isnan, isinf
-from miscalgoritms import *
+from .miscalgoritms import *
 import numpy as np
 
 class OptSep(object):
@@ -92,7 +92,7 @@ class OptSep(object):
         self.kisomax = 20  # the compound stay too much in the stationary phase
         self.mintg = 1
         self.maxtg = 60
-        self.c_lenght = 15 #cm
+        self.c_length = 15 #cm
         self.c_particle = 1.7 #um
         self.tr_min = 1
         self.tr_max = 60
@@ -104,7 +104,7 @@ class OptSep(object):
         """
         gcondlst = []
         sellst = []
-        trlst = []
+        trlst: list[list[float]] = []
         #d_init_b = (g_start_max - g_start_min)/20.
         #d_final_b = (g_stop_max-g_stop_min)/20.
         #print d_init_b, d_final_b
@@ -117,9 +117,9 @@ class OptSep(object):
                     lsscc = None
                     lowest_alpha = None
                     if model == "lss":
-                        lsscc, lowest_alpha = get_lss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
+                        lsscc, lowest_alpha = get_lss_gradient_critical_selectivity(self.c_length, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
                     else:#
-                        lsscc, lowest_alpha = get_logss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
+                        lsscc, lowest_alpha = get_logss_gradient_critical_selectivity(self.c_length, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_alpha=1.01)
 
                     if lowest_alpha != None:
                         #print init_b, final_b, tg, lowest_alpha
@@ -140,11 +140,12 @@ class OptSep(object):
     def getAutomaticElutionWindowStretching(self, model, flow=0.3, g_start_min=0.00, g_start_max=1.0, g_stop_min=0.1, g_stop_max=1.0, time_grad_min=2, time_grad_max=60):
         """ Calculate the automatic elution window stretching to optimise the separation
         """
-        gcond = []
         best_dindx = None
-        t0 = self.v_m *self.flow
-        td = self.v_d *self.flow
+        gcond = []
+        t0 = self.v_m * self.flow
+        td = self.v_d * self.flow
         lssmol = SSGenerator(None, None, None, t0, self.v_d, self.flow)
+        logssmol = SSGenerator(None, None, None, t0, self.v_d, self.flow)
         print(g_start_min, g_stop_min)
         for init_b in np.linspace(g_start_min, g_start_max, 20, endpoint=True):
             for final_b in np.linspace(g_stop_min, g_stop_max, 20, endpoint=True):
@@ -229,7 +230,7 @@ class OptSep(object):
         """
         gcondlst = []
         reslst = []
-        trlst = []
+        trlst: list[list[float]] = []
         step = 0.05
         for init_b in np.linspace(g_start_min, g_start_max, 20, endpoint=True):
             for final_b in np.linspace(g_stop_min, g_stop_max, 20, endpoint=True):
@@ -237,9 +238,9 @@ class OptSep(object):
                     lsscc = None
                     lowest_alpha = None
                     if model == "lss":
-                        lsscc, lowestrs = get_lss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=1.8)
+                        lsscc, lowestrs = get_lss_gradient_critical_rs(self.c_length, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=1.8)
                     else:#
-                        lsscc, lowestrs = get_logss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=1.8)
+                        lsscc, lowestrs = get_logss_gradient_critical_rs(self.c_length, self.c_particle, init_b, final_b, tg, flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=1.8)
 
 
                     if lsscc != None and len(lsscc) > 0:
@@ -253,42 +254,6 @@ class OptSep(object):
                     else:
                         continue
         return gcondlst, reslst, trlst
-
-    def isocratic_iterfun(self, phi):
-        """ Iterative function which minimize the rs.
-        This function will take into account also the
-        peak enlargement function of the organic modifier utilized."""
-        if phi > 0:
-            tr = []
-            for row in self.logkw_s_tab:
-                logk = row[0] - (row[1]*phi)
-                k = pow(10, logk)
-                if k > self.kisomin and k < self.kisomax:
-                    t0 = self.v_m/self.flow
-                    tr_tmp = (k *t0) + t0
-                    tr.append(tr_tmp)
-                else:
-                    continue
-            if len(tr) == len(self.logkw_s_tab):
-                tr.sort()
-                rs = []
-                for i in range(1, len(tr)):
-                    width1 = sqrt((5.54*tr[i-1]*tr[i-1])/ self.plate)
-                    width2 = sqrt((5.54*tr[i]*tr[i]) / self.plate)
-                    rs.append((2.*(tr[i]-tr[i-1]))/(width1+width2))
-
-                # Search the critical couple
-                small_rs = max(rs)
-                for i in range(len(rs)):
-                    if rs[i] < small_rs and rs[i] > 0:
-                        small_rs = rs[i]
-                    else:
-                        continue
-                return 1/small_rs
-            else:
-                return 9999
-        else:
-            return 9999
 
     def getisoconditions(self):
         """ Optimizer function starting
@@ -345,8 +310,8 @@ class OptSep(object):
         if final_b > 1 or final_b < 0 or init_b < 0 or init_b > 1 or tg < 0 or tg > self.maxtg or fabs(init_b-0.01) < 1e-1 or fabs(final_b-0.01) < 1e-1:
             return 9999
         else:
-            #lsscc, lowestrs = get_lss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=2.0)
-            lsscc, lowestsel = get_lss_gradient_critical_selectivity(self.c_lenght, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, 1.2)
+            #lsscc, lowestrs = get_lss_gradient_critical_rs(self.c_length, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=2.0)
+            lsscc, lowestsel = get_lss_gradient_critical_selectivity(self.c_length, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, 1.2)
             # lsscc: first two column correspond to the object id, the last to the rs associated
 
             if lowestsel != None:
@@ -385,6 +350,8 @@ class OptSep(object):
                         best_gcond = tmp_bestgcond
                         best_rsmax = tmp_rsmax
 
+        if best_gcond is None or best_rsmax is None:
+            return None, [], 0.0
 
         init_b = best_gcond[0]
         final_b = best_gcond[1]
@@ -410,13 +377,13 @@ class OptSep(object):
         """
         gcondlst = []
         rslst = []
-        trlst = []
+        trlst: list[list[float]] = []
         d_init_b = (g_start_max - g_start_min)/20.
         d_final_b = (g_stop_max-g_stop_min)/20.
         for init_b in drange(g_start_min, g_start_max, 0.05):
             for final_b in drange(g_stop_min+init_b, g_stop_max, 0.05):
                 for tg in drange(time_grad_min, time_grad_max,  1):
-                    lsscc, lowestrs = get_lss_gradient_critical_rs(self.c_lenght, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=2.0)
+                    lsscc, lowestrs = get_lss_gradient_critical_rs(self.c_length, self.c_particle, init_b, final_b, tg, self.flow, self.v_m, self.v_d, self.logkw_s_tab, crit_res=2.0)
                     # lsscc: first two column correspond to the object id, the last to the rs associated
                     if lsscc != None:
                         totrs = 0.
@@ -495,6 +462,9 @@ class OptSep(object):
                     else:
                         best_gcond = tmp_bestgcond
                         best_ss = tmp_ssmax
+
+        if best_gcond is None or best_ss is None:
+            return None, [], 0.0
 
         """
         self.maxtg = 15

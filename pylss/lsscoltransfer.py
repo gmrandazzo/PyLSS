@@ -6,9 +6,9 @@ Geneve Dec 2015
 '''
 
 #from scipy.optimize import fmin
-from optimizer import simplex as fmin
+from .optimizer import simplex as fmin
 from math import sqrt, pi, log10, log, exp, fabs, isnan, isinf, erf
-from optseparation import drange
+from .optseparation import drange
 from time import sleep
 
 def square(val):
@@ -149,7 +149,7 @@ class LSSColTrans(object):
             for j in range(len(self.trtab[i])):
                 trpred = self.rtpred(logkw, s, self.tg[j % sz_grad], self.init_B[j % sz_grad], self.final_B[j % sz_grad], self.alpha[j % sz_grad], self.t0[j % sz_grad], self.td[j % sz_grad])
                 rmsd += square(self.trtab[i][j] - trpred)
-                print("%.2f %.2f [%f %f]") % (self.trtab[i][j], trpred, self.t0[j % sz_grad], self.td[j % sz_grad])
+                print("%.2f %.2f [%f %f]" % (self.trtab[i][j], trpred, self.t0[j % sz_grad], self.td[j % sz_grad]))
 
         #print alpha
         print ("-"*20)

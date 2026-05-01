@@ -10,36 +10,24 @@ Geneve February 2015
 import os
 import sys
 
-path = None
-try:
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-except NameError:
-    path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-path += "/pylss"
-print(path)
-if not path in sys.path:
-    sys.path.insert(1, path)
-del path
+from PyQt6 import QtCore, QtGui, QtWidgets
 
-
-from PyQt5 import *
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import matplotlib.backends.backend_tkagg
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
+import matplotlib.backends.backend_qtagg
 import matplotlib.pyplot as plt
 
 
-from ssengine import *
-from plotengine import BuildChromatogram
+from pylss.ssengine import *
+from pylss.plotengine import BuildChromatogram
 
-import mainwindow as mw
-from importdialog import *
-from computelss import *
-from automaticelutionwindowstretching import *
-from plotmaps import *
-from aboutdialog import *
-from utilities import *
+from . import mainwindow as mw
+from .importdialog import *
+from .computelss import *
+from .automaticelutionwindowstretching import *
+from .plotmaps import *
+from .aboutdialog import *
+from .utilities import *
 
 class Data(object):
     def __init__(self, name, molname, trdata, grad, tg, vd, t0, flow, c_length, c_diameter, c_particle):
@@ -126,7 +114,7 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
 
         self.tablemodel = TableModel(self)
         self.tableView.setModel(self.tablemodel)
-        self.tableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tableView.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.tableView.customContextMenuRequested.connect(self.openTableMenu)
 
         # constant parameters
@@ -140,7 +128,7 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
         """ context menu event """
         menu = QtWidgets.QMenu(self)
         exportAction = menu.addAction("Export table as CSV")
-        action = menu.exec_(self.tableView.viewport().mapToGlobal(position))
+        action = menu.exec(self.tableView.viewport().mapToGlobal(position))
 
         if action == exportAction:
             fname, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)");
@@ -153,8 +141,8 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
 
 
     def keyPressEvent(self, e):
-        if (e.modifiers() & QtCore.Qt.ControlModifier):
-            if e.key() == QtCore.Qt.Key_C: #copy
+        if (e.modifiers() & QtCore.Qt.KeyboardModifier.ControlModifier):
+            if e.key() == QtCore.Qt.Key.Key_C: #copy
                 if len(self.tableView.selectionModel().selectedIndexes()) > 0:
                     previous = self.tableView.selectionModel().selectedIndexes()[0]
                     columns = []
@@ -163,7 +151,7 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
                         if previous.column() != index.column():
                             columns.append(rows)
                             rows = []
-                        rows.append(str(index.data().toPyObject()))
+                        rows.append(str(index.data()))
                         previous = index
                     columns.append(rows)
 
@@ -171,8 +159,8 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
                     clipboard = ""
                     nrows = len(columns[0])
                     ncols = len(columns)
-                    for r in xrange(nrows):
-                        for c in xrange(ncols):
+                    for r in range(nrows):
+                        for c in range(ncols):
                             clipboard += columns[c][r]
                             if c != (ncols-1):
                                 clipboard += '\t'
@@ -234,7 +222,7 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
 
     def add(self):
         idialog = ImportDialog()
-        if idialog.exec_() == 1:
+        if idialog.exec() == 1:
             [name, molname, trdata, grad, tg, td, t0, flow, c_length, c_diameter, c_particle] = idialog.getdata()
             self.datalst.append(Data(name, molname, trdata, grad, tg, td, t0, flow, c_length, c_diameter, c_particle))
             self.lstdatamodel.appendRow(QtGui.QStandardItem(name))
@@ -274,7 +262,7 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
 
     def about(self):
         adialog = AboutDialog()
-        adialog.exec_()
+        adialog.exec()
 
     def quit(self):
         QtWidgets.QApplication.quit()
@@ -287,7 +275,7 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
             items.append(item.text())
 
         runlss = ComputeLSS(items)
-        if runlss.exec_() == 1:
+        if runlss.exec() == 1:
             [indx, modelname] = runlss.getdata()
             t0 = self.datalst[indx].t0
             v_d = self.datalst[indx].vd
@@ -323,15 +311,15 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
 
     def calcautelwindowstretch(self):
         aws = AutomaticElutionWindowStretching(self.modellst)
-        aws.exec_()
+        aws.exec()
 
     def pltselectivitymap(self):
         smap = PlotMaps(self.modellst, "sel")
-        smap.exec_()
+        smap.exec()
 
     def pltresolutionmap(self):
         rsmap = PlotMaps(self.modellst, "res")
-        rsmap.exec_()
+        rsmap.exec()
 
     def gradientanalyser(self):
         indx = self.modelBox.currentIndex()
@@ -479,7 +467,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     form = MainWindow()
     form.show()
-    app.exec_()
+    app.exec()
 
 if __name__ == '__main__':
     main()

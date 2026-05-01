@@ -7,10 +7,9 @@ and is distributed under LGPL version 3
 Geneve February 2015
 '''
 
-from PyQt5 import *
-from PyQt5 import *
+from PyQt6 import QtCore, QtGui, QtWidgets
 
-from gui_aboutdialog import Ui_AboutDialog
+from .gui_aboutdialog import Ui_AboutDialog
 
 class AboutDialog(QtWidgets.QDialog, Ui_AboutDialog):
     def __init__(self, parent=None):

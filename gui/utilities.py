@@ -7,9 +7,11 @@ and is distributed under LGPL version 3
 Geneve February 2015
 '''
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import (
+    Qt, QAbstractTableModel, pyqtSignal, QModelIndex, QVariant, QTimer
+)
+from PyQt6.QtGui import QColor, QBrush
+from PyQt6.QtWidgets import QApplication, QFileDialog
 
 def nsplit(s, delim=None):
     """ Split a string by a delimiter """
@@ -32,8 +34,8 @@ class TableModel(QAbstractTableModel):
             super(TableModel, self).timerEvent(e)
 
     def refreshTableSlot(self):
-        self.beginResetModel.emit()
-        self.endResetModel.emit()
+        self.beginResetModel()
+        self.endResetModel()
 
     def clean(self):
         del self.arraydata[:]
@@ -62,24 +64,24 @@ class TableModel(QAbstractTableModel):
                     del self.arraydata[i][indx]
         self.endResetModel()
 
-    def rowCount(self, parent):
+    def rowCount(self, parent=QModelIndex()):
         return len(self.arraydata)
 
-    def columnCount(self, parent):
+    def columnCount(self, parent=QModelIndex()):
         if len(self.arraydata) > 0:
             return len(self.arraydata[0])
         else:
             return 0
 
-    def data(self, index, role):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
-            return QVariant()
-        elif role != Qt.DisplayRole:
-            return QVariant()
-        return QVariant(self.arraydata[index.row()][index.column()])
+            return None
+        elif role != Qt.ItemDataRole.DisplayRole:
+            return None
+        return self.arraydata[index.row()][index.column()]
 
-    def headerData(self, col, orientation, role):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+    def headerData(self, col, orientation, role=Qt.ItemDataRole.DisplayRole):
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
             if col < len(self.header):
                 return self.header[col]
             else:

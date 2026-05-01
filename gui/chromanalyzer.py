@@ -12,28 +12,19 @@ import sys
 
 #Need matplotlib
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import matplotlib.backends.backend_tkagg
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
+import matplotlib.backends.backend_qtagg
 import matplotlib.pyplot as plt
 import numpy as np
 
-path = None
-try:
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-except NameError:
-    path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-path += "/pylss"
-if not path in sys.path:
-    sys.path.insert(1, path)
-del path
+from PyQt6 import QtWidgets, QtCore, QtGui
 
-from PyQt5 import QtWidgets
-
-from gui_chromanalyzer import Ui_ChromAnalyzer
-from aboutdialog import *
-from utilities import *
-from chromanalysis import *
+from os.path import isfile, basename
+from .gui_chromanalyzer import Ui_ChromAnalyzer
+from .aboutdialog import AboutDialog
+from .utilities import TableModel
+from pylss.chromanalysis import ChromAnalysis
 
 class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
     def __init__(self, parent=None):
@@ -47,7 +38,7 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
 
         self.tablemodel = TableModel(self)
         self.tableView.setModel(self.tablemodel)
-        self.tableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tableView.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.tableView.customContextMenuRequested.connect(self.openTableMenu)
 
         # Add plot
@@ -63,8 +54,8 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
         self.plotterBox.setLayout(layout_chormatogram)
 
     def keyPressEvent(self, e):
-        if (e.modifiers() & QtCore.Qt.ControlModifier):
-            if e.key() == QtCore.Qt.Key_C: #copy
+        if (e.modifiers() & QtCore.Qt.KeyboardModifier.ControlModifier):
+            if e.key() == QtCore.Qt.Key.Key_C: #copy
                 if len(self.tableView.selectionModel().selectedIndexes()) > 0:
                     previous = self.tableView.selectionModel().selectedIndexes()[0]
                     columns = []
@@ -73,7 +64,7 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
                         if previous.column() != index.column():
                             columns.append(rows)
                             rows = []
-                        rows.append(str(index.data().toPyObject()))
+                        rows.append(str(index.data()))
                         previous = index
                     columns.append(rows)
 
@@ -81,8 +72,8 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
                     clipboard = ""
                     nrows = len(columns[0])
                     ncols = len(columns)
-                    for r in xrange(nrows):
-                        for c in xrange(ncols):
+                    for r in range(nrows):
+                        for c in range(ncols):
                             clipboard += columns[c][r]
                             if c != (ncols-1):
                                 clipboard += '\t'
@@ -96,7 +87,7 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
         """ context menu event """
         menu = QtWidgets.QMenu(self)
         exportAction = menu.addAction("Export table as CSV")
-        action = menu.exec_(self.tableView.viewport().mapToGlobal(position))
+        action = menu.exec(self.tableView.viewport().mapToGlobal(position))
         if action == exportAction:
             fname, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)");
             self.tablemodel.SaveTable(fname)
@@ -112,7 +103,7 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
     def about(self):
         adialog = AboutDialog()
         adialog.changeTitle("ChromAnalyzer")
-        adialog.exec_()
+        adialog.exec()
 
     def quit(self):
         QtWidgets.QApplication.quit()
@@ -194,7 +185,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     form = ChromAnalyzer()
     form.show()
-    app.exec_()
+    app.exec()
 
 if __name__ == '__main__':
     main()

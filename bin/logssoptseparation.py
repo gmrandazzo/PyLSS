@@ -8,18 +8,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import scipy.interpolate
 
-path = None
-try:
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-except NameError:
-    path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-path += "/pylss"
-if not path in sys.path:
-    sys.path.insert(1, path)
-del path
 
-from ssengine import *
-from optseparation import *
+
+from pylss.ssengine import *
+from pylss.optseparation import *
 
 def main():
     """ Main function """
@@ -63,10 +55,10 @@ def main():
                 flow = str.split(line.strip(), ":")[-1].strip()
             elif "Gradient " in line:
                 v = str.split(line.strip(), ":")[-1].strip()
-                v = str.split(v, " ")
-                tg.append(float(v[0]))
-                init_B.append(float(v[1])/100.)
-                final_B.append(float(v[2])/100.)
+                v_parts = str.split(v, " ")
+                tg.append(float(v_parts[0]))
+                init_B.append(float(v_parts[1])/100.)
+                final_B.append(float(v_parts[2])/100.)
             elif "Time zero" in line:
                 t0 = str.split(line.strip(), ":")[-1].strip()
             elif "Temperature:" in line:

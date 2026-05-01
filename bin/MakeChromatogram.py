@@ -27,19 +27,11 @@ C = peak width
 import os
 import sys
 
-path = None
-try:
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-except NameError:
-    path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-path += "/pylss"
-if not path in sys.path:
-    sys.path.insert(1, path)
-del path
+
 
 import string
 import re
-from plotengine import *
+from pylss.plotengine import *
 
 def main():
     if len(sys.argv) < 5:

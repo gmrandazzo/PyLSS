@@ -7,11 +7,10 @@ and is distributed under LGPL version 3
 Geneve February 2015
 '''
 
-from PyQt5 import *
-from PyQt5 import *
+from PyQt6 import QtCore, QtGui, QtWidgets
 import sys
 
-from gui_computelss import Ui_ComputeLSS
+from .gui_computelss import Ui_ComputeLSS
 
 class ComputeLSS(QtWidgets.QDialog, Ui_ComputeLSS):
     def __init__(self, items, parent=None):

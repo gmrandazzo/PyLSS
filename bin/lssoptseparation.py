@@ -3,18 +3,10 @@
 import os
 import sys
 
-path = None
-try:
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-except NameError:
-    path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-path += "/pylss"
-if not path in sys.path:
-    sys.path.insert(1, path)
-del path
 
-from ssengine import *
-from optseparation import *
+
+from pylss.ssengine import *
+from pylss.optseparation import *
 
 def main():
     """ Main function """
@@ -58,10 +50,10 @@ def main():
                 flow = float(str.split(line.strip(), ":")[-1].strip())
             elif "Gradient " in line:
                 v = str.split(line.strip(), ":")[-1].strip()
-                v = str.split(v, " ")
-                tg.append(float(v[0]))
-                init_B.append(float(v[1])/100.)
-                final_B.append(float(v[2])/100.)
+                v_parts = str.split(v, " ")
+                tg.append(float(v_parts[0]))
+                init_B.append(float(v_parts[1])/100.)
+                final_B.append(float(v_parts[2])/100.)
             elif "Time zero" in line:
                 t0 = str.split(line.strip(), ":")[-1].strip()
             elif "Temperature:" in line:
@@ -79,11 +71,11 @@ def main():
         fi.close()
         opt = OptSep(float(t0)*float(flow), v_d, flow, logkw_s_tab)
         [phi, tr] = opt.getisoconditions()
-        print("Best Percentage of Organic Solvent: %.2f" % (phi)
-        print("Compounds will elute in this manner"
+        print("Best Percentage of Organic Solvent: %.2f" % (phi))
+        print("Compounds will elute in this manner")
         for time in tr:
-            print("%.2f" % (time)
-        print("_"*20
+            print("%.2f" % (time))
+        print("_"*20)
 
         [gcond, tr, Rs] = opt.getgradientconditions(1, 10)
 
@@ -93,10 +85,10 @@ def main():
         #tr = []
         #Rs = max(rs)
 
-        print("Best Gradient Conditions with Rs: %f" % (Rs)
-        print(" init B: %f\n final B: %f\n Time Gradient: %f\n Flow rate:%f\n t0: %f" % (gcond[0], gcond[1], gcond[2], flow, opt.v_m/flow)
+        print("Best Gradient Conditions with Rs: %f" % (Rs))
+        print(" init B: %f\n final B: %f\n Time Gradient: %f\n Flow rate:%f\n t0: %f" % (gcond[0], gcond[1], gcond[2], flow, opt.v_m/flow))
         for time in tr:
-            print("%.2f" % (time)
+            print("%.2f" % (time))
 
 if __name__ == "__main__":
     main()

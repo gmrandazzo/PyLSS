@@ -24,7 +24,7 @@ Actually it contains some algorithms such as:
 '''
 
 import decimal
-from miscalgoritms import *
+from .miscalgoritms import *
 
 from math import sqrt, fabs
 from os.path import isfile, basename
@@ -170,7 +170,7 @@ class ChromAnalysis(object):
 
     def peaksplit(self, signal):
         """ Method to split the peaks identified by getPeask() """
-        peaklst = []
+        peaklst: list[list[list[float]]] = []
         p = [] # peak
         #pnlst = []
         #pn = [] # number in peak
