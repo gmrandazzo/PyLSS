@@ -30,7 +30,7 @@ import sys
 from .gui_importdialog import Ui_ImportDialog
 from os.path import isfile, basename
 from .utilities import TableModel, nsplit
-from pylss.io import parse_lss_input
+from ..io import parse_lss_input
 
 class ImportDialog(QtWidgets.QDialog, Ui_ImportDialog):
     def __init__(self,parent=None):

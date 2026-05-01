@@ -27,18 +27,19 @@ dev = [
 ]
 
 [project.gui-scripts]
-pylss-gui = "gui.pylss_gui:main"
-pylss-chromanalyzer = "gui.chromanalyzer:main"
+pylss-gui = "pylss.gui.pylss_gui:main"
+pylss-chromanalyzer = "pylss.gui.chromanalyzer:main"
 
 [project.scripts]
-pylss-lssgen = "bin.lssgen:main"
-pylss-lssopt = "bin.lssoptseparation:main"
-pylss-logssgen = "bin.logssgen:main"
-pylss-logssopt = "bin.logssoptseparation:main"
-pylss-makechrom = "bin.MakeChromatogram:main"
+pylss-lssgen = "pylss.lssgen:main"
+pylss-lssopt = "pylss.lssoptseparation:main"
+pylss-logssgen = "pylss.logssgen:main"
+pylss-logssopt = "pylss.logssoptseparation:main"
+pylss-makechrom = "pylss.MakeChromatogram:main"
 
 [project.urls]
 Homepage = "https://github.com/gmrandazzo/PyLSS"
 
 [tool.setuptools]
-packages = ["pylss", "gui", "bin"]
+package-dir = {"" = "src"}
+packages = ["pylss", "pylss.gui"]

@@ -29,7 +29,7 @@ import sys
 
 from .gui_automaticelutionwindowstretching import Ui_AutomaticElutionWindowStretching
 
-from pylss.optseparation import *
+from ..optseparation import *
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar

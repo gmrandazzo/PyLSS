@@ -23,9 +23,9 @@ import matplotlib.pyplot as plt
 import scipy.interpolate
 
 
-from pylss.ssengine import *
-from pylss.optseparation import *
-from pylss.plotengine import *
+from .ssengine import *
+from .optseparation import *
+from .plotengine import *
 
 def main():
     """ Main function """

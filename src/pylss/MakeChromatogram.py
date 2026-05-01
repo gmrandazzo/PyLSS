@@ -47,7 +47,7 @@ import sys
 
 import string
 import re
-from pylss.plotengine import *
+from .plotengine import *
 
 def main():
     if len(sys.argv) < 5:

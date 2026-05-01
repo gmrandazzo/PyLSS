@@ -41,7 +41,7 @@ from os.path import isfile, basename
 from .gui_chromanalyzer import Ui_ChromAnalyzer
 from .aboutdialog import AboutDialog
 from .utilities import TableModel
-from pylss.chromanalysis import ChromAnalysis
+from ..chromanalysis import ChromAnalysis
 
 class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
     def __init__(self, parent=None):

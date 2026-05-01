@@ -4,7 +4,7 @@ PyLSS [1] is a Python package designed to calculate linear solvent strength (LSS
 
 PyLSS features a personalized optimization algorithm that rapidly and accurately calculates LSS parameters, making it an invaluable tool for method development and retention time prediction.
 
-![ScreenShot](https://github.com/gmrandazzo/PyLSS/raw/master/gui/pylssgui.png)
+![ScreenShot](https://github.com/gmrandazzo/PyLSS/raw/master/src/pylss/gui/pylssgui.png)
 
 ## Features
 
@@ -13,6 +13,10 @@ PyLSS features a personalized optimization algorithm that rapidly and accurately
 - **Separation Optimization:** Optimize isocratic and gradient conditions automatically using built-in algorithms (e.g., Nelder-Mead simplex).
 - **Interactive GUI:** A modern, PyQt6-based graphical user interface to effortlessly manage models, estimate parameters, and visualize results (Selectivity and Resolution maps).
 - **Command-Line Tools:** Powerful CLI executables for batch processing and automated workflows.
+
+## Author
+
+- **Giuseppe Marco Randazzo** - [gmrandazzo@gmail.com](mailto:gmrandazzo@gmail.com)
 
 ## Dependencies
 

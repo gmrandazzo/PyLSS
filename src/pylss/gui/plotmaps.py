@@ -29,7 +29,7 @@ import sys
 
 from .gui_plotmaps import Ui_PlotMaps
 
-from pylss.optseparation import *
+from ..optseparation import *
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar

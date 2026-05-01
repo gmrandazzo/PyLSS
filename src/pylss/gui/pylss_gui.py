@@ -35,8 +35,8 @@ import matplotlib.backends.backend_qtagg
 import matplotlib.pyplot as plt
 
 
-from pylss.ssengine import *
-from pylss.plotengine import BuildChromatogram
+from ..ssengine import *
+from ..plotengine import BuildChromatogram
 
 from . import mainwindow as mw
 from .importdialog import *

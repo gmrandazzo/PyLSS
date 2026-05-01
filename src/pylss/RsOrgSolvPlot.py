@@ -21,8 +21,8 @@ import sys
 
 
 
-from pylss.ssengine import *
-from pylss.optseparation import *
+from .ssengine import *
+from .optseparation import *
 
 def main():
     """ Main function """
