@@ -34,8 +34,9 @@ jobs:
         
     - name: Run tests with pytest
       run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)/src
         pytest
         
     - name: Static type checking with mypy
       run: |
-        mypy pylss bin gui
+        mypy src
