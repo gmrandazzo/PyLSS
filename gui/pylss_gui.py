@@ -128,13 +128,15 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
         """ context menu event """
         menu = QtWidgets.QMenu(self)
         exportAction = menu.addAction("Export table as CSV")
-        action = menu.exec(self.tableView.viewport().mapToGlobal(position))
+        viewport = self.tableView.viewport()
+        if viewport is not None:
+            action = menu.exec(viewport.mapToGlobal(position))
 
-        if action == exportAction:
-            fname, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)");
-            self.tablemodel.SaveTable(fname)
-        else:
-            return
+            if action == exportAction:
+                fname, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)");
+                self.tablemodel.SaveTable(fname)
+            else:
+                return
 
 
         return
@@ -143,11 +145,12 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
     def keyPressEvent(self, e):
         if (e.modifiers() & QtCore.Qt.KeyboardModifier.ControlModifier):
             if e.key() == QtCore.Qt.Key.Key_C: #copy
-                if len(self.tableView.selectionModel().selectedIndexes()) > 0:
-                    previous = self.tableView.selectionModel().selectedIndexes()[0]
-                    columns = []
-                    rows = []
-                    for index in self.tableView.selectionModel().selectedIndexes():
+                selection_model = self.tableView.selectionModel()
+                if selection_model is not None and len(selection_model.selectedIndexes()) > 0:
+                    previous = selection_model.selectedIndexes()[0]
+                    columns: list[list[str]] = []
+                    rows: list[str] = []
+                    for index in selection_model.selectedIndexes():
                         if previous.column() != index.column():
                             columns.append(rows)
                             rows = []
@@ -168,7 +171,8 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
 
                     # copy to the system clipboard
                     sys_clip = QtWidgets.QApplication.clipboard()
-                    sys_clip.setText(clipboard)
+                    if sys_clip is not None:
+                        sys_clip.setText(clipboard)
 
     def home(self):
         self.toolbar.home()
@@ -239,7 +243,9 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
                 del self.tablemodel.arraydata[:]
                 del self.tablemodel.header[:]
                 self.tablemodel.clean()
-                self.tableView.model().layoutChanged.emit()
+                model = self.tableView.model()
+                if model is not None:
+                    model.layoutChanged.emit()
                 molname = self.datalst[self.current_lst_index].molname
                 trdata = self.datalst[self.current_lst_index].trdata
                 grad = self.datalst[self.current_lst_index].grad
@@ -257,7 +263,9 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
             del self.tablemodel.arraydata[:]
             del self.tablemodel.header[:]
             self.tablemodel.clean()
-            self.tableView.model().layoutChanged.emit()
+            model = self.tableView.model()
+            if model is not None:
+                model.layoutChanged.emit()
             self.gradientanalyser()
 
     def about(self):
@@ -270,9 +278,11 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
     def calculatelss(self):
         items = []
         lstmodel = self.listView.model()
-        for index in range(lstmodel.rowCount()):
-            item = lstmodel.item(index)
-            items.append(item.text())
+        if lstmodel is not None:
+            for index in range(lstmodel.rowCount()):
+                item = getattr(lstmodel, 'item')(index)
+                if item is not None:
+                    items.append(item.text())
 
         runlss = ComputeLSS(items)
         if runlss.exec() == 1:
@@ -328,7 +338,9 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
         self.tablemodel.clean()
         header = ["Molecule", "log kW", "S", "tR"]
         self.tablemodel.setHeader(header)
-        self.tableView.model().layoutChanged.emit()
+        model = self.tableView.model()
+        if model is not None:
+            model.layoutChanged.emit()
         if indx >= 0 and indx < len(self.modellst):
             #predict the retention time for each compound
             molname = [name for name in self.modellst[indx].molname]
@@ -374,9 +386,11 @@ class MainWindow(QtWidgets.QMainWindow, mw.Ui_MainWindow):
                 else:
                     trtab.append([tr, A, W])
                 trlst.append([round(trtab[-1][0], 2), W, molname[i]])
-                row = [molname[i], round(lss_logkw, 3), round(lss_s, 3), round(trtab[-1][0],2)]
-                self.tablemodel.addRow(row)
-                self.tableView.model().layoutChanged.emit()
+                row_data = [molname[i], round(lss_logkw, 3), round(lss_s, 3), round(trtab[-1][0],2)]
+                self.tablemodel.addRow(row_data)
+                model = self.tableView.model()
+                if model is not None:
+                    model.layoutChanged.emit()
                 i += 1
 
             # Calculate the critical resolution

@@ -39,12 +39,13 @@ def main():
     else:
 
         trtab = []
-        namelst = ["time"]
+        namelst: list[str] = ["time"]
         fi = open(sys.argv[1], "r")
         for line in fi:
-            peak = []
-            v = str.split(re.sub('\s+',' ',line))
-            v = filter(None, v)
+            if not line.strip(): continue
+            v_line = str.split(re.sub('\s+',' ',line.strip()))
+            v = list(filter(None, v_line))
+            if not v: continue
             namelst.append(v[0])
             trtab.append([float(v[1]), float(v[2]), float(v[3])])
         fi.close()

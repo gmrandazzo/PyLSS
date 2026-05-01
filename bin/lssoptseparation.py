@@ -69,6 +69,10 @@ def main():
                 lss_logkw, lss_s = lssmol.getlssparameters(tr, tg, init_B, final_B)
                 logkw_s_tab.append([lss_logkw, lss_s])
         fi.close()
+        if t0 is None or flow is None or v_d is None:
+            print("Error: Missing parameters in input file.")
+            return
+            
         opt = OptSep(float(t0)*float(flow), v_d, flow, logkw_s_tab)
         [phi, tr] = opt.getisoconditions()
         print("Best Percentage of Organic Solvent: %.2f" % (phi))
@@ -77,13 +81,11 @@ def main():
             print("%.2f" % (time))
         print("_"*20)
 
-        [gcond, tr, Rs] = opt.getgradientconditions(1, 10)
+        [gcond, tr, Rs] = opt.getgradientconditions("lss", 10)
 
-        #[gconds, rs] = opt.getplotgradientconditions()
-        #indx = rs.index(max(rs))
-        #gcond = gconds[indx]
-        #tr = []
-        #Rs = max(rs)
+        if gcond is None:
+            print("No valid gradient conditions found.")
+            return
 
         print("Best Gradient Conditions with Rs: %f" % (Rs))
         print(" init B: %f\n final B: %f\n Time Gradient: %f\n Flow rate:%f\n t0: %f" % (gcond[0], gcond[1], gcond[2], flow, opt.v_m/flow))

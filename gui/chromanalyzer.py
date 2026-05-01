@@ -56,11 +56,12 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
     def keyPressEvent(self, e):
         if (e.modifiers() & QtCore.Qt.KeyboardModifier.ControlModifier):
             if e.key() == QtCore.Qt.Key.Key_C: #copy
-                if len(self.tableView.selectionModel().selectedIndexes()) > 0:
-                    previous = self.tableView.selectionModel().selectedIndexes()[0]
-                    columns = []
-                    rows = []
-                    for index in self.tableView.selectionModel().selectedIndexes():
+                selection_model = self.tableView.selectionModel()
+                if selection_model is not None and len(selection_model.selectedIndexes()) > 0:
+                    previous = selection_model.selectedIndexes()[0]
+                    columns: list[list[str]] = []
+                    rows: list[str] = []
+                    for index in selection_model.selectedIndexes():
                         if previous.column() != index.column():
                             columns.append(rows)
                             rows = []
@@ -81,18 +82,21 @@ class ChromAnalyzer(QtWidgets.QWidget, Ui_ChromAnalyzer):
 
                     # copy to the system clipboard
                     sys_clip = QtWidgets.QApplication.clipboard()
-                    sys_clip.setText(clipboard)
+                    if sys_clip is not None:
+                        sys_clip.setText(clipboard)
 
     def openTableMenu(self, position):
         """ context menu event """
         menu = QtWidgets.QMenu(self)
         exportAction = menu.addAction("Export table as CSV")
-        action = menu.exec(self.tableView.viewport().mapToGlobal(position))
-        if action == exportAction:
-            fname, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)");
-            self.tablemodel.SaveTable(fname)
-        else:
-            return
+        viewport = self.tableView.viewport()
+        if viewport is not None:
+            action = menu.exec(viewport.mapToGlobal(position))
+            if action == exportAction:
+                fname, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", "CSV (*.csv)");
+                self.tablemodel.SaveTable(fname)
+            else:
+                return
         return
 
     def openchrom(self):

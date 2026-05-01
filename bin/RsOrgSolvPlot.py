@@ -56,13 +56,30 @@ def main():
             elif "Time zero:" in line:
                 t0 = str.split(line.strip(), ":")[-1].strip()
             else:
-                lssmol = SSGenerator(c_length, c_diameter, c_porosity, t0,
-                                      v_d, flow, init_b, final_b, tg1, tg2)
+                if c_length is None or c_diameter is None or c_porosity is None or t0 is None or v_d is None or flow is None:
+                    continue
+                lssmol = SSGenerator(float(c_length), float(c_diameter), float(c_porosity), float(t0),
+                                      float(v_d), float(flow))
                 var = str.split(line.strip(), ";")
-                lss_logkw, lss_s = lssmol.getlssparameters(var[0], var[1])
+                if len(var) < 2:
+                    continue
+                tr = [float(var[0]), float(var[1])]
+                # Extract gradients from file if possible, or assume defaults based on the outdated script logic
+                # For now, matching the SSGenerator.getlssparameters(tr, tg, init_B, final_B)
+                # We need tg1, tg2, init_b, final_b to be defined
+                if tg1 is None or tg2 is None or init_b is None or final_b is None:
+                    continue
+                tg = [float(tg1), float(tg2)]
+                init_B = [float(init_b)/100., float(init_b)/100.]
+                final_B = [float(final_b)/100., float(final_b)/100.]
+                
+                lss_logkw, lss_s = lssmol.getlssparameters(tr, tg, init_B, final_B)
                 logkw_s_tab.append([lss_logkw, lss_s])
         fi.close()
-        isoopt = OptSep(t0, logkw_s_tab)
+        if t0 is None or v_d is None or flow is None:
+            return
+        # OptSep(v_m, v_d, flow, logkw_s_tab)
+        isoopt = OptSep(float(t0)*float(flow), float(v_d), float(flow), logkw_s_tab)
         phirs = isoopt.getplotisoconditions()
         for row in phirs:
             print("%f  %f  %f" % (row[0], row[1], row[3]))

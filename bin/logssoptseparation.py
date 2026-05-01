@@ -74,66 +74,52 @@ def main():
                 lss_logkw, lss_s = logssmol.getlogssparameters(tr, tg, init_B, final_B)
                 logkw_s_tab.append([lss_logkw, lss_s])
         fi.close()
-        opt = OptSep(float(t0)*float(flow), v_d, flow, logkw_s_tab)
-        #[phi, tr] = opt.getisoconditions()
-        #print("Best Percentage of Organic Solvent: %.2f" % (phi)
-        #print("Compounds will elute in this manner"
-        #for time in tr:
-    #        print("%.2f" % (time)
-#        print("_"*20
+        if t0 is None or flow is None or v_d is None:
+            print("Error: Missing parameters in input file.")
+            return
 
-        #[gcond, tr, Rs] = opt.getloggradientconditions(10,20)
+        opt = OptSep(float(t0)*float(flow), float(v_d), float(flow), logkw_s_tab)
 
-        #[gconds, rs] = opt.getplotgradientconditions()
-        #indx = rs.index(max(rs))
-        #gcond = gconds[indx]
-        #tr = []
-        #Rs = max(rs)
-
-        #print("Best Gradient Conditions with Rs: %f" % (Rs)
-        #print("init B: %f\nfinal B: %f\nTime Gradient: %f\n" % (gcond[0], gcond[1], gcond[2])
-        #for time in tr:
-        #    print("%.2f" % (time)
-
-        [gcondlst, sellst, trlst] = opt.getlogssselMapPlot(float(flow), g_start_min=0.00, g_start_max=0.10, g_stop_min=0.90, g_stop_max=1.0, time_grad_min=5, time_grad_max=30)
+        [gcondlst, sellst, trlst] = opt.getSelMapPlot("logss", float(flow), g_start_min=0.00, g_start_max=0.10, g_stop_min=0.90, g_stop_max=1.0, time_grad_min=5, time_grad_max=30)
         #Plot selectivity map
-        x = []
-        y_alpha = []
-        y_final_b = []
-        y_tg = []
-        z = []
+        x_list = []
+        y_alpha_list = []
+        y_final_b_list = []
+        y_tg_list = []
+        z_list = []
         for i in range(len(gcondlst)):
             #gcondlst.append([init_b, final_b, tg, self.flow, lowest_alpha])
-            x.append(float(gcondlst[i][0])*100)
-            y_alpha.append(float((gcondlst[i][1]-gcondlst[i][0])/log(gcondlst[i][2]+1))) # alpha
-            y_final_b.append(float(gcondlst[i][1])*100) # final b
-            y_tg.append(float(gcondlst[i][2])) # tg
-            z.append(float(gcondlst[i][-1]))
+            x_list.append(float(gcondlst[i][0])*100)
+            y_alpha_list.append(float((gcondlst[i][1]-gcondlst[i][0])/log(gcondlst[i][2]+1))) # alpha
+            y_final_b_list.append(float(gcondlst[i][1])*100) # final b
+            y_tg_list.append(float(gcondlst[i][2])) # tg
+            z_list.append(float(gcondlst[i][-1]))
 
-        x = np.asarray(x)
-        y_alpha = np.asarray(y_alpha)
-        y_final_b = np.asarray(y_final_b)
-        y_tg = np.asarray(y_tg)
-        z = np.asarray(z)
+        if not x_list:
+            print("No valid conditions found for the map.")
+            return
+
+        x = np.asarray(x_list)
+        y_alpha = np.asarray(y_alpha_list)
+        y_final_b = np.asarray(y_final_b_list)
+        y_tg = np.asarray(y_tg_list)
+        z = np.asarray(z_list)
 
         # Set up a regular grid of interpolation points
         npoints = 1000
         xi, yi_alpha = np.linspace(x.min(), x.max(), npoints), np.linspace(y_alpha.min(), y_alpha.max(), npoints)
-        xi, yi_alpha = np.meshgrid(xi, yi_alpha)
+        xi_grid_alpha, yi_alpha_grid = np.meshgrid(xi, yi_alpha)
 
         xi, yi_final_b = np.linspace(x.min(), x.max(), npoints), np.linspace(y_final_b.min(), y_final_b.max(), npoints)
-        xi, yi_final_b = np.meshgrid(xi, yi_final_b)
+        xi_grid_final_b, yi_final_b_grid = np.meshgrid(xi, yi_final_b)
 
         xi, yi_tg = np.linspace(x.min(), x.max(), npoints), np.linspace(y_tg.min(), y_tg.max(), npoints)
-        xi, yi_tg = np.meshgrid(xi, yi_tg)
+        xi_grid_tg, yi_tg_grid = np.meshgrid(xi, yi_tg)
 
         # Interpolate
-        #rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
-        #zi = rbf(xi, yi)
-
-        zi_alpha = scipy.interpolate.griddata((x, y_alpha), z, (xi, yi_alpha), method='linear')
-        zi_final_b = scipy.interpolate.griddata((x, y_final_b), z, (xi, yi_final_b), method='linear')
-        zi_tg = scipy.interpolate.griddata((x, y_tg), z, (xi, yi_tg), method='linear')
+        zi_alpha = scipy.interpolate.griddata((x, y_alpha), z, (xi_grid_alpha, yi_alpha_grid), method='linear')
+        zi_final_b = scipy.interpolate.griddata((x, y_final_b), z, (xi_grid_final_b, yi_final_b_grid), method='linear')
+        zi_tg = scipy.interpolate.griddata((x, y_tg), z, (xi_grid_tg, yi_tg_grid), method='linear')
 
 
         #f, axarr = plt.subplots(3, sharex=True)
