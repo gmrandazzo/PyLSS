@@ -148,12 +148,12 @@ January 2007
 
 ## License
 
-PyLSS is distributed under the **LGPLv3 license**.
+PyLSS is distributed under the **GNU Affero General Public License (AGPLv3)**.
 
 - You can use this library where you want, doing what you want.
 - You can modify this library and commit changes.
-- **You cannot use this library inside a commercial closed-source software.**
+- **If you use this library in a network service, you must make the source code available to your users.**
 
-To know more in detail how the license works, please read the `LICENSE` file or visit http://www.gnu.org/licenses/lgpl-3.0.html.
+To know more in detail how the license works, please read the `LICENSE` file or visit https://www.gnu.org/licenses/agpl-3.0.html.
 
 PyLSS is currently the property of Giuseppe Marco Randazzo, who is also the current package maintainer.

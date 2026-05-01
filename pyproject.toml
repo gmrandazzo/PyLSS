@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
   { name = "Giuseppe Marco Randazzo", email = "gmrandazzo@gmail.com" }
 ]
-license = { text = "LGPL" }
+license = { text = "AGPL" }
 dependencies = [
   "numpy",
   "matplotlib",
